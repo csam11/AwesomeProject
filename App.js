@@ -5,7 +5,9 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>Simple Fitness</Text>
-      <button>Click me!</button>
+      <button>Log in</button>
+      <button>Create Account</button>
+      <button>forgot Password?</button>
       <StatusBar style="auto" />
     </View>
   );
