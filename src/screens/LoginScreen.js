@@ -1,12 +1,37 @@
 // LoginScreen.js
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 
 const LoginScreen = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = () => {
+    console.log('Username:', username);
+    console.log('Password:', password);
+  };
+
   return (
     <View style={styles.container}>
       <Text>Login Screen</Text>
-      {/* Add your login form components here */}
+      
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={(text) => setUsername(text)}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={(text) => setPassword(text)}
+      />
+
+      <Button title="Login" onPress={handleLogin} />
+
     </View>
   );
 };
@@ -17,6 +42,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    margin: 10,
+    padding: 8,
+    width: '80%',
   },
 });
 
