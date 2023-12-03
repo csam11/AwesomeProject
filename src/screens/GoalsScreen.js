@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Picker, StyleSheet } from 'react-native';
 
-const GoalsScreen = () => {
+const GoalsScreen = ({ navigation }) => {
   const [currentWeight, setCurrentWeight] = useState('');
   const [goalWeight, setGoalWeight] = useState('');
   const [height, setHeight] = useState('');
@@ -15,8 +15,10 @@ const GoalsScreen = () => {
     const calculatedCalories = calculateCalories(currentWeight, height, age, sex, rate);
     const { protein, carbs, fats } = calculateMacronutrientRatio(calculatedCalories, currentWeight);
 
+    //can be changed to be foodJournalScreen
+    navigation.navigate('WeightJournalScreen');
     // Display the calculated information or navigate to another screen to display it
-    alert(`calories: ${calculatedCalories}, Protein: ${protein}g, Carbs: ${carbs}g, Fats: ${fats}g`);
+    // alert(`calories: ${calculatedCalories}, Protein: ${protein}g, Carbs: ${carbs}g, Fats: ${fats}g`);
   };
 
   const calculateCalories = (currentWeight, height, age, sex, rate) => {
