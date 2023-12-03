@@ -2,19 +2,29 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
+  // Hardcoded username and password for testing purposes
+  const correctUsername = 'testuser';
+  const correctPassword = 'testpassword';
+
   const handleLogin = () => {
-    console.log('Username:', username);
-    console.log('Password:', password);
-  };
+    if (username == correctUsername && password == correctPassword) {
+      console.log('Login successful');
+      navigation.navigate('WeightJournalScreen');
+    } else {
+      alert('Login failed Invalid username or password');
+      setUsername('')
+      setPassword('')
+    }
+  };  
 
   return (
     <View style={styles.container}>
       <Text>Login Screen</Text>
-      
+
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -31,7 +41,6 @@ const LoginScreen = () => {
       />
 
       <Button title="Login" onPress={handleLogin} />
-
     </View>
   );
 };
