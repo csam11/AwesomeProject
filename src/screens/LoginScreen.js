@@ -1,23 +1,35 @@
-// LoginScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
+  const users = [
+    { username: 'user1', password: 'password1' },
+    { username: 'user2', password: 'password2' },
+    // Add more users as needed
+  ];
+
   const handleLogin = () => {
-    console.log('Username:', username);
-    console.log('Password:', password);
+    const user = users.find((user) => user.username === username && user.password === password);
+    errorMessage = 'Login Failed', 'Invalid username or password'
+    if (user) {
+      // Successful login, navigate to the GoalsScreen
+      navigation.navigate('GoalsScreen');
+    } else {
+      // Handle authentication error
+      alert(errorMessage);
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text>Login Screen</Text>
-      
+
       <TextInput
         style={styles.input}
-        placeholder="Username"
+        placeholder="Username?"
         value={username}
         onChangeText={(text) => setUsername(text)}
       />
@@ -31,7 +43,6 @@ const LoginScreen = () => {
       />
 
       <Button title="Login" onPress={handleLogin} />
-
     </View>
   );
 };
