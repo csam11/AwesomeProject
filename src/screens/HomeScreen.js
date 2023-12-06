@@ -14,6 +14,11 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('ForgotPassword');
   };
 
+  const handleJournal = () => {
+    navigation.navigate('Journal');
+  };
+
+
   return (
     <View style={styles.container}>
       <Text style={{ marginBottom: 20 }}>Simple Fitness</Text>
@@ -25,6 +30,9 @@ const HomeScreen = ({ navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity onPress={handleCreateAccount}>
         <Text>Create Account</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleJournal}>
+        <Text>Journal</Text>
       </TouchableOpacity>
     </View>
   );
