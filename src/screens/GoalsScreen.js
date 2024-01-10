@@ -60,6 +60,11 @@ const GoalsScreen = ({ navigation }) => {
     return { protein, carbs, fats };
   };
 
+  const handleLogout = () => {
+    // Navigate to the LoginScreen when the logout button is pressed
+    navigation.navigate('LoginScreen');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Current Weight kg</Text>
@@ -125,6 +130,10 @@ const GoalsScreen = ({ navigation }) => {
       <TouchableOpacity onPress={calculateNutrition}>
         <Text>Calculate Nutrition</Text>
       </TouchableOpacity>
+
+      {/* Logout Button */}
+      <Button title="Logout" onPress={handleLogout} />
+      
     </View>
   );
 };
