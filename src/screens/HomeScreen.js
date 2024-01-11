@@ -18,6 +18,9 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('Journal');
   };
 
+  const handleExercise = () => {
+    navigation.navigate('ExerciseJournal');
+  };
 
   return (
     <View style={styles.container}>
@@ -33,6 +36,9 @@ const HomeScreen = ({ navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity onPress={handleJournal}>
         <Text>Journal</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleExercise}>
+        <Text>Exercise Journal</Text>
       </TouchableOpacity>
     </View>
   );
