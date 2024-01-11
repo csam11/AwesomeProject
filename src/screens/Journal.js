@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Animated, TouchableOpacity, Picker, Button } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import { BarChart } from 'react-native-chart-kit';
 import { PieChart } from 'react-native-chart-kit';
+
+const AddedFoodInfo = ({ addedFood }) => {
+  return (
+    <View>
+      <Text>Recently Added Food:</Text>
+      <Text>Name: {addedFood.name}</Text>
+      <Text>Calories: {addedFood.calories}</Text>
+      <Text>Fat: {addedFood.fat}g</Text>
+      <Text>Carbs: {addedFood.carbs}g</Text>
+      <Text>Quantity: {addedFood.quantity}</Text>
+    </View>
+  );
+};
 
 const JournalScreen = () => {
   const [currentDay, setCurrentDay] = useState('');
@@ -9,7 +22,7 @@ const JournalScreen = () => {
   const [selectedOption, setSelectedValue] = useState('');
   const options = ['Snacks', 'Morning', 'Afternoon', 'Evening'];
   const [goal, setGoal] = useState(2568);
-  const [currentValue, setCurrentValue] = useState(567);
+  const [currentValue, setCurrentValue] = useState(0);
   const [progress, setProgress] = useState((currentValue / goal) * 100);
   const [selectedTimeOfDay, setSelectedTimeOfDay] = useState('');
   const [selectedFood, setSelectedFood] = useState('');
@@ -19,16 +32,24 @@ const JournalScreen = () => {
     afternoon: [],
     night: [],
   });
+  const [totalFat, setTotalFat] = useState(0);
+  const [totalCarbs, setTotalCarbs] = useState(0);
+  const [quantity, setQuantity] = useState('1'); 
+  const [recentlyAddedFood, setRecentlyAddedFood] = useState(null);
+
+
+
 
   const foodOptions = [
-    { name: 'Eggs', calories: 70 },
-    { name: 'Bacon', calories: 120 },
-    { name: 'Toast', calories: 80 },
-    { name: 'Salad', calories: 50 },
-    { name: 'Burger', calories: 300 },
-    { name: 'Pasta', calories: 250 },
-    // Add more food items as needed
+    { name: 'Eggs', calories: 70, fat: 5, carbs: 1 },
+    { name: 'Bacon', calories: 120, fat: 10, carbs: 0 },
+    { name: 'Toast', calories: 80, fat: 2, carbs: 15 },
+    { name: 'Salad', calories: 160, fat: 3, carbs: 10 },
+    { name: 'Burger', calories: 800, fat: 20, carbs: 25 },
+    { name: 'Pasta', calories: 750, fat: 5, carbs: 45 },
+    //more foods later
   ];
+  
 
   const handleSelectChange = (value) => {
     setSelectedFood(value);
@@ -66,17 +87,35 @@ const JournalScreen = () => {
   const addCaloriesToPeriod = () => {
     if (selectedFood !== '' && selectedTimeOfDay !== '') {
       const foodObj = foodOptions.find((food) => food.name === selectedFood);
+      const quantityValue = parseInt(quantity, 10) || 1; //make sure the quantity is an integer for food
+  
       if (foodObj) {
         const updatedSelectedTime = { ...selectedTime };
-        updatedSelectedTime[selectedTimeOfDay].push({
+        const foodItem = {
           name: selectedFood,
-          calories: foodObj.calories,
-        });
+          calories: foodObj.calories * quantityValue,
+          fat: foodObj.fat * quantityValue,
+          carbs: foodObj.carbs * quantityValue,
+          quantity: quantityValue,
+        };
+  
+        updatedSelectedTime[selectedTimeOfDay].push(foodItem);
         setSelectedTime(updatedSelectedTime);
-        setSelectedFood(''); // Clear the selected food after adding
+  
+        //update total fat and carbs
+        const updatedTotalFat = totalFat + foodObj.fat * quantityValue;
+        const updatedTotalCarbs = totalCarbs + foodObj.carbs * quantityValue;
+        setTotalFat(updatedTotalFat);
+        setTotalCarbs(updatedTotalCarbs);
+  
+        setSelectedFood(''); 
+        setQuantity('1'); 
+        
+        setRecentlyAddedFood(foodItem);
       }
     }
   };
+  
 
   const addCaloriesToCurrentValue = () => {
     if (selectedFood !== '') {
@@ -84,13 +123,13 @@ const JournalScreen = () => {
       if (foodObj) {
         const updatedCurrentValue = currentValue + foodObj.calories;
         setCurrentValue(updatedCurrentValue);
-        setSelectedFood(''); // Clear the selected food after adding
+        setSelectedFood(''); //clear the food value once selected and submitted
       }
     }
   };
 
   const handleAdd = () => {
-    // Wrapper function calling both functions
+    //
     addCaloriesToPeriod();
     addCaloriesToCurrentValue();
   };
@@ -103,18 +142,17 @@ const JournalScreen = () => {
     return allCalories;
   };
 
-  // ProgressBar component
+  //progressBar
   const ProgressBar = ({ progress }) => {
     return (
       <View style={styles.progressBarContainer}>
         <View style={[styles.progressBar, { width: `${progress}%` }]}>
-          {/* Remove the nested View with width styling */}
         </View>
       </View>
     );
   };
 
-    // Function to update progress bar
+    //function used in conjunction with the progress bar 
     const updateProgressBar = () => {
         const calculatedProgress = (currentValue / goal) * 100;
         setProgress(calculatedProgress);
@@ -139,15 +177,14 @@ const JournalScreen = () => {
 // ...
 
 const renderLineChart = () => {
-    // Calculate total calories for different times of the day
+    //calculate the total calories for each given time of day
     const caloriesPerTimeOfDay = [
       calculateTotalCalories('morning'),
       calculateTotalCalories('afternoon'),
       calculateTotalCalories('night'),
-      // Add more time of day calculations as needed
     ];
   
-    const timeOfDayLabels = ['Morning', 'Afternoon', 'Night']; // Labels for different times of the day
+    const timeOfDayLabels = ['Morning', 'Afternoon', 'Night']; //the different time of days
   
     const lineChartData = {
       labels: timeOfDayLabels,
@@ -161,62 +198,94 @@ const renderLineChart = () => {
     const lineChartConfig = {
       backgroundGradientFrom: '#ffffff',
       backgroundGradientTo: '#ffffff',
+      decimalPlaces: 0,
       color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+      color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`, 
+      
     };
   
     return (
-      <LineChart
+      <BarChart
         data={lineChartData}
         width={1200}
         height={400}
         yAxisSuffix=" kCal"
         chartConfig={lineChartConfig}
         bezier
-        style={{ borderRadius: 5 }}
+        style={{ 
+          borderRadius: 0 }}
       />
     );
   };
+  //this function is used to populate the quantity drop down for the user input
+    const renderQuantityPickerItems = () => {
+      const quantityOptions = [1, 2, 3, 4, 5]; 
+      return quantityOptions.map((value, index) => (
+        <Picker.Item key={index} label={value.toString()} value={value.toString()} />
+      ));
+    };
   
-  // ...
-  
-  
-    const renderPieChart = () => {
-            // Calculate calories consumed per time of day
-    const caloriesPerTimeOfDay = {
-        Morning: calculateTotalCalories('morning'),
-        Afternoon: calculateTotalCalories('afternoon'),
-        Night: calculateTotalCalories('night'),
+    //function used to render a pie chart relative to the nutrient type
+    const renderPieChart = (nutrientType) => {
+      const nutrientPerTimeOfDay = {
+        Morning: calculateTotalNutrient('morning', nutrientType),
+        Afternoon: calculateTotalNutrient('afternoon', nutrientType),
+        Night: calculateTotalNutrient('night', nutrientType),
       };
+  
+      const colors = ['#FF6347', '#FFD700', '#7FFF00'];
+  
+      const pieChartData = Object.keys(nutrientPerTimeOfDay).map((timeOfDay, index) => ({
+        name: timeOfDay,
+        population: nutrientPerTimeOfDay[timeOfDay],
+        color: colors[index] || '#000000',
+        legendFontColor: '#7F7F7F',
+        legendFontSize: 9,
+      }));
+  
+      return (
+        <View style={{ marginBottom: 20 }}>
+          <Text>{nutrientType === 'calories' ? 'Calories' : nutrientType}</Text>
+          <PieChart
+            data={pieChartData}
+            width={250}
+            height={100}
+            chartConfig={{
+              backgroundColor: '#ffffff',
+              backgroundGradientFrom: '#ffffff',
+              backgroundGradientTo: '#ffffff',
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            }}
+            accessor="population"
+            backgroundColor="transparent"
+            paddingLeft="15"
+          />
+        </View>
+      );
+    };
+  //calculate the nutrients of the given food from the given time
+    const calculateTotalNutrient = (time, nutrientType) => {
+      if (selectedTime && selectedTime[time]) {
+        return selectedTime[time].reduce((totalNutrient, food) => {
+          return totalNutrient + food[nutrientType];
+        }, 0);
+      }
+      return 0;
+    };
 
-        const colors = ['#FF6347', '#FFD700', '#7FFF00']; // Predefined distinct colors for morning, afternoon, and night
+    const handleRemoveFood = (timeOfDay, index) => {
+      const updatedSelectedTime = { ...selectedTime };
+      const removedFood = updatedSelectedTime[timeOfDay].splice(index, 1)[0];
       
-        const pieChartData = Object.keys(caloriesPerTimeOfDay).map((timeOfDay, index) => ({
-          name: timeOfDay,
-          population: caloriesPerTimeOfDay[timeOfDay],
-          color: colors[index] || '#000000', // Assign colors based on index or use a default color
-          legendFontColor: '#7F7F7F',
-          legendFontSize: 15 + index * 3, // Adjust the legend font size
-        }));
-      
-        return (
-          <View style={{}}>
-            <PieChart
-              data={pieChartData}
-              width={650}
-              height={400}
-              chartConfig={{
-                backgroundColor: '#ffffff',
-                backgroundGradientFrom: '#ffffff',
-                backgroundGradientTo: '#ffffff',
-                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              }}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="15"
-            />
-          </View>
-        );
-      };
+      //update total fat and carbs relative to the time of day, this will also extend more nutrientations
+      const updatedTotalFat = totalFat - removedFood.fat;
+      const updatedTotalCarbs = totalCarbs - removedFood.carbs;
+      setTotalFat(updatedTotalFat);
+      setTotalCarbs(updatedTotalCarbs);
+    
+      setSelectedTime(updatedSelectedTime);
+    };
+    
       
 
   return (
@@ -231,57 +300,113 @@ const renderLineChart = () => {
       </View>
       <View style={styles.bigRectangle}>
         {renderLineChart()}
+        <View styles={{flex: 1, alignItems: 'flex-start', justifyContent: 'center'}}>
+        {recentlyAddedFood && (
+            <AddedFoodInfo addedFood={recentlyAddedFood} />
+          )}
+        </View>
       </View>
       <View style={styles.bottomContainer}>
         <View style={styles.square}>
-          <View style={styles.pieChartContainer}>
-            {renderPieChart()} {/* Render the pie chart */}
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 25, justifyContent: 'center' }}>
+          {renderPieChart('calories')}
+          {renderPieChart('fat')} 
+          {renderPieChart('carbs')} 
           </View>
         </View>
         <View style={styles.square}>
-        <View style={styles.container}>
-      <Text>Select Time of Day:</Text>
-      <Picker
-        selectedValue={selectedTimeOfDay}
-        onValueChange={(itemValue) => setSelectedTimeOfDay(itemValue)}
-      >
-        <Picker.Item label="Select" value="" />
-        <Picker.Item label="Morning" value="morning" />
-        <Picker.Item label="Afternoon" value="afternoon" />
-        <Picker.Item label="Night" value="night" />
-      </Picker>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Search food..."
-        value={searchTerm}
-        onChangeText={handleSearchChange}
-      />
-
-      <Picker
-        selectedValue={selectedFood}
-        onValueChange={(itemValue) => setSelectedFood(itemValue)}
-      >
-        <Picker.Item label="Select Food" value="" />
-        {filteredFoodOptions.map((food, index) => (
-          <Picker.Item key={index} label={food.name} value={food.name} />
-        ))}
-      </Picker>
-            <Button title="Add" onPress={handleAdd} />
-      <View>
-        <Text>Total Calories for {selectedTimeOfDay}</Text>
-        <Text>{calculateTotalCalories(selectedTimeOfDay)}</Text>
-      </View>
-    </View>
+        <View>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 25, justifyContent: 'center' }}>
+        <Text>Select Time of Day:</Text>
+        <View style={{ marginBottom: 0 }}>
+          <Picker
+            selectedValue={selectedTimeOfDay}
+            onValueChange={(itemValue) => setSelectedTimeOfDay(itemValue)}
+          >
+            <Picker.Item label="Select" value="" />
+            <Picker.Item label="Morning" value="morning" />
+            <Picker.Item label="Afternoon" value="afternoon" />
+            <Picker.Item label="Night" value="night" />
+          </Picker>
         </View>
+        <View>
+          <TextInput
+            style={styles.input}
+            placeholder="Search food:"
+            value={searchTerm}
+            onChangeText={handleSearchChange}
+          />
+        </View>
+        <View>
+          <Picker
+            selectedValue={selectedFood}
+            onValueChange={(itemValue) => setSelectedFood(itemValue)}
+          >
+            <Picker.Item label="Select Food" value="" />
+            {filteredFoodOptions.map((food, index) => (
+              <Picker.Item key={index} label={food.name} value={food.name} />
+            ))}
+          </Picker>
+        </View>
+        <View>
+            
+          <Picker
+              selectedValue={quantity}
+              onValueChange={(itemValue) => setQuantity(itemValue)}
+            >
+              {renderQuantityPickerItems()}
+          </Picker>
+
+        </View>
+          <Button title="Add" onPress={handleAdd} />
+
       </View>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Type here to search..."
-        />
-      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={styles.infoContainer}>
+          <Text>Morning</Text>
+          <Text>Total Calories: {calculateTotalCalories('morning')}</Text>
+          <Text>Total Fat: {selectedTime.morning.reduce((total, food) => total + food.fat, 0)}g</Text>
+          <Text>Total Carbs: {selectedTime.morning.reduce((total, food) => total + food.carbs, 0)}g</Text>
+          <View>
+          {selectedTime.morning.map((food, index) => (
+          <TouchableOpacity key={index} onPress={() => handleRemoveFood('morning', index)}>
+          <Text>{food.name} - {food.quantity}</Text>
+          </TouchableOpacity>
+          ))}
+          </View>
+          </View>
+          <View style={styles.infoContainer}>
+          <Text>Afternoon</Text>
+          <Text>Total Calories: {calculateTotalCalories('afternoon')}</Text>
+          <Text>Total Fat: {selectedTime.afternoon.reduce((total, food) => total + food.fat, 0)}g</Text>
+          <Text>Total Carbs: {selectedTime.afternoon.reduce((total, food) => total + food.carbs, 0)}g</Text>
+          <View>
+          {selectedTime.afternoon.map((food, index) => (
+          <TouchableOpacity key={index} onPress={() => handleRemoveFood('afternoon', index)}>
+          <Text>{food.name} - {food.quantity}</Text>
+          </TouchableOpacity>
+          ))}
+          </View>
+          </View>
+          <View style={styles.infoContainer}>
+          <Text>Night</Text>
+          <Text>Total Calories: {calculateTotalCalories('night')}</Text>
+          <Text>Total Fat: {selectedTime.night.reduce((total, food) => total + food.fat, 0)}g</Text>
+          <Text>Total Carbs: {selectedTime.night.reduce((total, food) => total + food.carbs, 0)}g</Text>
+          <View>
+          {selectedTime.night.map((food, index) => (
+          <TouchableOpacity key={index} onPress={() => handleRemoveFood('night', index)}>
+          <Text>{food.name} - {food.quantity}</Text>
+          </TouchableOpacity>
+          ))}
+          </View>
+          </View>
+        </View>
     </View>
+    </View>
+  </View>
+</View>
+
   );
   
 };
@@ -290,6 +415,7 @@ const styles = StyleSheet.create({
     // ... (existing styles)
   
     bigRectangle: {
+      flexDirection: 'row',
       width: '100%',
       height: 400, // Height of the big rectangle
       backgroundColor: 'lightgray', // Example background color
@@ -297,7 +423,7 @@ const styles = StyleSheet.create({
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      border: '5px solid lightblue',
+ 
       // Other styles for the big rectangle
     },
     bottomContainer: {
@@ -305,19 +431,29 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       width: '100%',
     },
+
+    infoContainer: {
+      marginTop: 15,
+      justifyContent: 'space-between',
+      padding: 0,
+      backgroundColor: 'lightgray',
+
+      width: '30%', // Adjust as needed
+      height: '100%',
+    },
+
     square: {
       flex: 1,
       aspectRatio: 1, // Maintain a 1:1 aspect ratio
       backgroundColor: 'lightgray', // Example background color
-      marginRight: 10,
+      marginRight: 0,
       height: 400,
       // Other styles for the squares
     },
     pieChartContainer: {
-      flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      border: '5px solid lightblue',
+  
 
       // Styles for the container of the pie chart
       // Adjust styles as needed
