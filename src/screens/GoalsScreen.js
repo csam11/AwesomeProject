@@ -62,7 +62,7 @@ const GoalsScreen = ({ navigation }) => {
 
   const handleLogout = () => {
     // Navigate to the LoginScreen when the logout button is pressed
-    navigation.navigate('LoginScreen');
+    navigation.navigate('Login');
   };
 
   return (
@@ -131,8 +131,9 @@ const GoalsScreen = ({ navigation }) => {
         <Text>Calculate Nutrition</Text>
       </TouchableOpacity>
 
-      {/* Logout Button */}
-      <Button title="Logout" onPress={handleLogout} />
+      <TouchableOpacity onPress={handleLogout}>
+        <Text>Logout</Text>
+      </TouchableOpacity>
       
     </View>
   );
