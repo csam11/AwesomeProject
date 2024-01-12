@@ -4,23 +4,35 @@ import { LineChart } from 'react-native-chart-kit';
 
 const WeightJournalScreen = () => {
   const [weight, setWeight] = useState('');
+  const [date, setDate] = useState('');
   const [isModalVisible, setModalVisible] = useState(false);
-  const [weights, setWeights] = useState([65, 66, 64, 68, 67]); // Samples
-  const [dates, setDates] = useState(['01/01', '01/02', '01/03', '01/04', '01/05']); // Samples
+  const [weightData, setWeightData] = useState([
+    { weight: 65, date: '01/01' },
+    { weight: 66, date: '01/02' },
+    { weight: 64, date: '01/03' },
+    { weight: 68, date: '01/04' },
+    { weight: 67, date: '01/05' },
+  ]); // Samples
 
   const chartData = {
-    labels: dates,
+    labels: weightData.map((entry) => entry.date),
     datasets: [
       {
-        data: weights,
+        data: weightData.map((entry) => entry.weight),
       },
     ],
   };
 
   const addWeight = () => {
-    if (weight) {
-      setWeights((prevWeights) => [...prevWeights, parseFloat(weight)]);
+    if (weight && date) {
+      const newWeightEntry = {
+        weight: parseFloat(weight),
+        date: date,
+      };
+
+      setWeightData((prevData) => [...prevData, newWeightEntry]);
       setWeight('');
+      setDate('');
       setModalVisible(false);
     }
   };
@@ -53,13 +65,19 @@ const WeightJournalScreen = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text>Enter Weight</Text>
+            <Text>Enter Weight and Date</Text>
             <TextInput
               style={styles.input}
               placeholder="Weight"
               keyboardType="numeric"
               onChangeText={(text) => setWeight(text)}
               value={weight}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Date (e.g., 01/06)"
+              onChangeText={(text) => setDate(text)}
+              value={date}
             />
             <TouchableOpacity onPress={addWeight}>
               <Text>Add</Text>
