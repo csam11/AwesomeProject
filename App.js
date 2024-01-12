@@ -9,6 +9,7 @@ import GoalsScreen from './src/screens/GoalsScreen'
 import JournalScreen from './src/screens/Journal';
 import WeightJournalScreen from './src/screens/WeightJournalScreen'
 import ExerciseJournalScreen from './src/screens/ExerciseJournal';
+import SleepJournalScreen from './src/screens/SleepJournal';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,7 @@ export default function App() {
         <Stack.Screen name="Journal" component={JournalScreen} />  
         <Stack.Screen name="ExerciseJournal" component={ExerciseJournalScreen} />
         <Stack.Screen name="WeightJournalScreen" component={WeightJournalScreen} />
+        <Stack.Screen name="SleepJournal" component={SleepJournalScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
