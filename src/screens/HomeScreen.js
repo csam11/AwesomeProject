@@ -14,6 +14,18 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('ForgotPassword');
   };
 
+  const handleJournal = () => {
+    navigation.navigate('Journal');
+  };
+
+  const handleExercise = () => {
+    navigation.navigate('ExerciseJournal');
+  };
+
+  const handleSleep = () => {
+    navigation.navigate('SleepJournal');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={{ marginBottom: 20 }}>Simple Fitness</Text>
@@ -25,6 +37,15 @@ const HomeScreen = ({ navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity onPress={handleCreateAccount}>
         <Text>Create Account</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleJournal}>
+        <Text>Journal</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleExercise}>
+        <Text>Exercise Journal</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleSleep}>
+        <Text>Sleep Journal</Text>
       </TouchableOpacity>
     </View>
   );
