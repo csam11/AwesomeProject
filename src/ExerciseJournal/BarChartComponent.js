@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions } from 'react-native';
+import { Dimensions, View } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 
 const defaultChartConfig = {
@@ -26,11 +26,18 @@ const defaultChartConfig = {
   }
 };
 
-const defaultScreenWidth = Dimensions.get("window").width;
+const defaultScreenWidth = "90%";
 
 const BarChartComponent = ({dayCalories, screenWidth = defaultScreenWidth, chartConfig = defaultChartConfig}) => (
-  <BarChart
-    data={{
+  <View style={{alignItems : 'center'}}>
+      <BarChart
+      width={Dimensions.get("window").width * (parseInt(screenWidth) / 100)}
+      height={220}
+      yAxisLabel="Cal"
+      chartConfig={chartConfig}
+      barRadius={5}
+
+      data={{
       labels: Object.keys(dayCalories),
       datasets: [
         {
@@ -38,11 +45,9 @@ const BarChartComponent = ({dayCalories, screenWidth = defaultScreenWidth, chart
         },
       ],
     }}
-    width={screenWidth}
-    height={220}
-    yAxisLabel="Calories"
-    chartConfig={chartConfig}
   />
+  </View>
+
 );
 
 export default BarChartComponent;
