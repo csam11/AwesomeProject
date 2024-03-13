@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Button, View, Dimensions } from 'react-native';
+import { ScrollView, StyleSheet, Button, View, Dimensions, TouchableOpacity, Text } from 'react-native';
 import AddedExerciseInfo from '../ExerciseJournal/AddedExerciseInfo'; 
 import ProgressBar from '../ExerciseJournal/ProgressBar';
 import ExerciseTypePicker from '../ExerciseJournal/ExerciseTypePicker';
@@ -10,7 +10,7 @@ import ExercisePicker from '../ExerciseJournal/ExercisePicker';
 import BarChartComponent from '../ExerciseJournal/BarChartComponent'; 
 import Title from '../ExerciseJournal/Title';
 
-const ExerciseJournalScreen = () => {
+const ExerciseJournalScreen = ({navigation}) => {
   const [selectedExerciseType, setSelectedExerciseType] = useState('');
   const [selectedDay, setSelectedDay] = useState('');
   const [calories, setCalories] = useState('');
@@ -88,20 +88,34 @@ const ExerciseJournalScreen = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-        <Title
-          currentDay={currentDay}
-          currentTime={currentTime}
-          progress={progress}
-          currentValue={currentValue}
-          goal={goal}
-        />
-
-
-        <BarChartComponent
-          dayCalories = {dayCalories}  
-        />
-
-
+      <Title
+        currentDay={currentDay}
+        currentTime={currentTime}
+        progress={progress}
+        currentValue={currentValue}
+        goal={goal}
+      />
+  
+      <BarChartComponent
+        dayCalories={dayCalories}
+      />
+  
+      {/* Added buttons */}
+      <View style={styles.bottomButtonsContainer}>
+        <TouchableOpacity style={styles.bottomButton} onPress={() => navigation.navigate('Journal')}>
+          <Text>Food Journal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomButton} onPress={() => navigation.navigate('SleepJournal')}>
+          <Text>Sleep Journal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomButton} onPress={() => navigation.navigate('WeightJournalScreen')}>
+          <Text>Weight Journal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomButton}>
+          <Text>Exercise Journal</Text>
+        </TouchableOpacity>
+      </View>
+  
       <ExerciseTypePicker
         selectedExerciseType={selectedExerciseType}
         onExerciseTypeChange={setSelectedExerciseType}
@@ -127,19 +141,28 @@ const ExerciseJournalScreen = () => {
       />
       <Button title="Add Exercise" onPress={handleAddExercise} />
       {addedExercise && <AddedExerciseInfo addedExercise={addedExercise} />}
-
-     </ScrollView>
-
+    </ScrollView>
   );
 };
 
-
-
-
 const styles = StyleSheet.create({
   container: {
+    flexGrow: 1,
     padding: 10,
   },
+  bottomButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: '#fff', // Ensure buttons appear above ScrollView content
+    paddingVertical: 10,
+  },
+  bottomButton: {
+    backgroundColor: '#ccc',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
 });
+
 
 export default ExerciseJournalScreen;

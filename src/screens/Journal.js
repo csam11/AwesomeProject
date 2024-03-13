@@ -16,7 +16,7 @@ const AddedFoodInfo = ({ addedFood }) => {
   );
 };
 
-const JournalScreen = () => {
+const JournalScreen = ({navigation}) => {
   const [currentDay, setCurrentDay] = useState('');
   const [currentTime, setCurrentTime] = useState('');
   const [selectedOption, setSelectedValue] = useState('');
@@ -405,6 +405,12 @@ const renderLineChart = () => {
     </View>
     </View>
   </View>
+  <View style={styles.bottomContainer}>
+  <Button title="Food Journal" onPress={() => navigation.navigate('Journal')} />
+        <Button title="Sleep Journal" onPress={() => navigation.navigate('SleepJournal')} />
+        <Button title="Weight Journal" onPress={() => navigation.navigate('WeightJournalScreen')} />
+        <Button title="Exercise Journal" onPress={() => navigation.navigate('ExerciseJournal')} />
+</View>
 </View>
 
   );
@@ -430,6 +436,8 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       justifyContent: 'space-between',
       width: '100%',
+      marginTop: 20, // Adjust as needed
+      marginBottom: 20, // Adjust as needed
     },
 
     infoContainer: {
