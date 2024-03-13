@@ -154,6 +154,32 @@ const SleepJournalScreen = ({ navigation }) => {
         </View>
       </View>
       <View style={styles.bottomContainer}>
+      <View style={styles.square}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 25, justifyContent: 'center' }}>
+            <View>
+              <Picker selectedValue={selectedDay} onValueChange={handleDayChange}>
+                <Picker.Item label="Select Day" value="" />
+                <Picker.Item label="Monday" value="Monday" />
+                <Picker.Item label="Tuesday" value="Tuesday" />
+                <Picker.Item label="Wednesday" value="Wednesday" />
+                <Picker.Item label="Thursday" value="Thursday" />
+                <Picker.Item label="Friday" value="Friday" />
+                <Picker.Item label="Saturday" value="Saturday" />
+                <Picker.Item label="Sunday" value="Sunday" />
+              </Picker>
+            </View>
+            <View>
+              <TextInput
+                style={styles.input}
+                placeholder="Sleep Duration (mins)"
+                value={sleepDuration}
+                onChangeText={handleSleepDurationChange}
+                keyboardType="numeric"
+              />
+            </View>
+            <Button title="Add" onPress={handleAdd} />
+          </View>
+        </View>
       <Button title="Food Journal" onPress={() => navigation.navigate('Journal')} />
         <Button title="Sleep Journal" onPress={() => navigation.navigate('SleepJournal')} />
         <Button title="Weight Journal" onPress={() => navigation.navigate('WeightJournalScreen')} />
