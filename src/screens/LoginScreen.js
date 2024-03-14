@@ -1,25 +1,26 @@
 // LoginScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import axios from 'axios';
 
 const LoginScreen = ({ navigation }) => {
+  const apiCall = () => {
+      axios.post('http://localhost:8080/login', {
+          username: username,
+          password: password
+      })
+      .then(response => {
+          console.log(response.data.message); // Log the response from the server
+          navigation.navigate('WeightJournalScreen');
+      })
+      .catch(error => {
+          alert('Login failed. ' + error.response.data.error);
+          setUsername('');
+          setPassword('');
+      });
+  };
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
-  // Hardcoded username and password for testing purposes
-  const correctUsername = 'testuser';
-  const correctPassword = 'testpassword';
-
-  const handleLogin = () => {
-    if (username == correctUsername && password == correctPassword) {
-      console.log('Login successful');
-      navigation.navigate('WeightJournalScreen');
-    } else {
-      alert('Login failed Invalid username or password');
-      setUsername('')
-      setPassword('')
-    }
-  };  
 
   return (
     <View style={styles.container}>
@@ -40,7 +41,7 @@ const LoginScreen = ({ navigation }) => {
         onChangeText={(text) => setPassword(text)}
       />
 
-      <Button title="Login" onPress={handleLogin} />
+      <Button title="Login" onPress={apiCall} />
     </View>
   );
 };
