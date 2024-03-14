@@ -24,3 +24,17 @@ app.post('/login', (req, res) => {
         return res.status(401).json({ error: 'Invalid username or password' });
     }
 })
+
+app.post('/register', (req, res) => {
+    const { email, password } = req.body;
+
+    // Check if username and password are valid
+    if (email && password) {
+
+        // Implement your registration logic here
+
+        return res.status(200).json({ message: 'Registration successful' });
+    } else {
+        return res.status(400).json({ error: 'Invalid username or password' });
+    }
+})

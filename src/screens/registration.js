@@ -31,8 +31,28 @@ const RegistrationScreen = ({ navigation }) => {
       alert(errorMessage);
     } else {
       // Email and password are valid, implement your registration logic here
-      navigation.navigate('GoalsScreen');
+      fetch('http://localhost:8080/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: email,
+          password: password,
+        }),
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message === 'Registration successful') {
+          navigation.navigate('GoalsScreen');
+        } else {
+          // Handle error here
+          console.error('Registration failed');
+        }
+      })
+      .catch((error) => console.error(error));
     }
+
   };
 
   return (
