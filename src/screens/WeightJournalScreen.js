@@ -2,7 +2,22 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
-const WeightJournalScreen = () => {
+const WeightJournalScreen = ({ navigation }) => {
+
+
+  const handleJournal = () => {
+    navigation.navigate('Journal');
+  };
+
+  const handleExercise = () => {
+    navigation.navigate('ExerciseJournal');
+  };
+
+  const handleSleep = () => {
+    navigation.navigate('SleepJournal');
+  };
+
+
   const [weight, setWeight] = useState('');
   const [date, setDate] = useState('');
   const [isModalVisible, setModalVisible] = useState(false);
@@ -88,6 +103,21 @@ const WeightJournalScreen = () => {
           </View>
         </View>
       </Modal>
+
+      <View style={styles.bottomButtonsContainer}>
+        <TouchableOpacity style={styles.bottomButton}onPress={handleJournal}>
+          <Text>Food Journal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomButton}onPress={handleSleep}>
+          <Text>Sleep Journal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomButton}>
+          <Text>Weight Journal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomButton} onPress={handleExercise}>
+          <Text>Exercise Journal</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -120,6 +150,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginVertical: 10,
     paddingHorizontal: 10,
+  },
+  bottomButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    paddingBottom: 10,
+  },
+  bottomButton: {
+    backgroundColor: '#ccc',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
   },
 });
 

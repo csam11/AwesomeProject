@@ -12,7 +12,7 @@ const AddedSleepInfo = ({ addedSleep }) => {
   );
 };
 
-const SleepJournalScreen = () => {
+const SleepJournalScreen = ({ navigation }) => {
   const [currentDay, setCurrentDay] = useState('');
   const [currentTime, setCurrentTime] = useState('');
   const [selectedDay, setSelectedDay] = useState('');
@@ -110,7 +110,6 @@ const SleepJournalScreen = () => {
   const handleAdd = () => {
     addSleepToPeriod();
   };
-  
 
   const chartConfig = {
     backgroundGradientFrom: '#fff',
@@ -155,7 +154,7 @@ const SleepJournalScreen = () => {
         </View>
       </View>
       <View style={styles.bottomContainer}>
-        <View style={styles.square}>
+      <View style={styles.square}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 25, justifyContent: 'center' }}>
             <View>
               <Picker selectedValue={selectedDay} onValueChange={handleDayChange}>
@@ -181,92 +180,54 @@ const SleepJournalScreen = () => {
             <Button title="Add" onPress={handleAdd} />
           </View>
         </View>
+      <Button title="Food Journal" onPress={() => navigation.navigate('Journal')} />
+        <Button title="Sleep Journal" onPress={() => navigation.navigate('SleepJournal')} />
+        <Button title="Weight Journal" onPress={() => navigation.navigate('WeightJournalScreen')} />
+        <Button title="Exercise Journal" onPress={() => navigation.navigate('ExerciseJournal')} />
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-
-
-    bigRectangle: {
-      flexDirection: 'row',
-      width: '100%',
-      height: 400,
-      backgroundColor: 'lightgray',
-      marginBottom: 20,
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    titleContainer: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      border: '3px solid lightblue',
-  
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  titleContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    border: '3px solid lightblue',
   },
   bigRectangle: {
     flexDirection: 'row',
     width: '100%',
-    height: 400, 
-    backgroundColor: 'lightgray', 
+    height: 400,
+    backgroundColor: 'lightgray',
     marginBottom: 20,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  
   },
   bottomContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
   },
-  
-  infoContainer: {
-    marginTop: 15,
-    justifyContent: 'space-between',
-    padding: 0,
-    backgroundColor: 'lightgray',
-  
-    width: '30%', 
-    height: '100%',
-  },
-  
-  square: {
-    flex: 1,
-    aspectRatio: 1, 
-    backgroundColor: 'lightgray', 
-    marginRight: 0,
-    height: 400,
-    
-  },
-  pieChartContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  
-  },
-  titleContainer: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      border: '3px solid lightblue',
-  
-  },
   progressBarContainer: {
-      width: '75%',
-      height: 15,
-      backgroundColor: '#ccc',
-      borderRadius: 10,
-      marginTop: 20,
-      
-    },
-    progressBar: {
-      height: '100%',
-      backgroundColor: 'green', 
-      borderRadius: 10,
-    },
-  
-  
-  });
-  
+    width: '75%',
+    height: 15,
+    backgroundColor: '#ccc',
+    borderRadius: 10,
+    marginTop: 20,
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: 'green',
+    borderRadius: 10,
+  },
+});
 
 export default SleepJournalScreen;
