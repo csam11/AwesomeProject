@@ -1,20 +1,39 @@
+// ForgotPasswordScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import axios from 'axios';
+import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 
 const ForgotPasswordScreen = () => {
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   
-  const sendResetRequest = () => {
-    axios.post('http://localhost:8080/forgot-password', { email })
-      .then(response => {
-        alert('Password reset email sent.');
-      })
-      .catch(error => {
-        alert('Failed to send reset email. Please try again.');
-      });
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Regex for valid email address
+    return emailRegex.test(email);
   };
-  
+
+const handleSubmit = () => {
+  console.log('Submit button pressed with email: ', email); // debug
+  if (!validateEmail(email)) {
+    setEmailError('Invalid email address');
+    return;
+  };
+
+  // reset email error
+  setEmailError('');
+
+  // TODO: Implement API call for password reset here
+
+
+  window.alert('If an account exists for this email, a password reset link will be sent.');
+
+  Alert.alert(
+    'Password Reset',
+    'If an account exists for this email, a password reset link will be sent.',
+    [{ text: 'OK' }],
+  );
+};
+
+
   return (
     <View style={styles.container}>
       <Text>Forgot Password</Text>
@@ -23,8 +42,10 @@ const ForgotPasswordScreen = () => {
         placeholder="Enter your email"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
       />
-      <Button title="Send Reset Email" onPress={sendResetRequest} />
+      {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+      <Button title="Submit" onPress={handleSubmit} />
     </View>
   );
 };
@@ -32,16 +53,21 @@ const ForgotPasswordScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },
   input: {
     height: 40,
+    width: '80%',
     borderColor: 'gray',
     borderWidth: 1,
-    margin: 10,
-    padding: 8,
-    width: '80%',
+    marginVertical: 10,
+    paddingHorizontal: 10,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
   },
 });
 
