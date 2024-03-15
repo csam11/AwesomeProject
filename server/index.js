@@ -26,3 +26,36 @@ app.listen(8080, () => {
 
 
 app.use('/api/users', require('./routes/users'));
+
+app.post('/forgot-password', (req, res) => {
+    const { email } = req.body;
+    // Generate a unique token for the email address
+    const resetToken = generateResetToken(email);
+    // Send reset email containing a link with the token
+    sendResetEmail(email, resetToken)
+      .then(() => {
+        res.status(200).json({ message: 'Password reset email sent.' });
+      })
+      .catch(error => {
+        console.error('Error sending reset email:', error);
+        res.status(500).json({ error: 'Failed to send reset email.' });
+      });
+  });
+  
+  app.post('/reset-password', (req, res) => {
+    const { token, newPassword } = req.body;
+    // Verify the validity of the token
+    if (isValidResetToken(token)) {
+      // Update the password associated with the token's email address
+      updatePassword(token.email, newPassword)
+        .then(() => {
+          res.status(200).json({ message: 'Password reset successful.' });
+        })
+        .catch(error => {
+          console.error('Error resetting password:', error);
+          res.status(500).json({ error: 'Failed to reset password.' });
+        });
+    } else {
+      res.status(400).json({ error: 'Invalid or expired token.' });
+    }
+  });
