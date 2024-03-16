@@ -7,7 +7,10 @@ const User = require('../models/user');
 // POST /api/users/register - Register a new user
 router.post('/register', async (req, res) => {
     console.log('Registering user:', req.body);
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
+    console.log('username:', username);
+    console.log('email:', email);
+    console.log('password:', password);
 
     try {
         // Check if username and password are provided
@@ -22,18 +25,22 @@ router.post('/register', async (req, res) => {
         }
 
         // Create a new user instance
-        const newUser = new User({ email, password });
+        const newUser = new User({ username, email, password }); // Assign email value to username
 
         // Save the new user to the database
         await newUser.save();
 
+        console.log('Registration successful');
         return res.status(200).json({ message: 'Registration successful' });
+        
     } catch (error) {
         console.error('Registration failed:', error);
+        console.log('Registration failed');
         return res.status(500).json({ error: 'Registration failed' });
+        
     }
-    
 });
+
 
 // POST /api/users/login - Authenticate a user
 router.post('/login', async (req, res) => {

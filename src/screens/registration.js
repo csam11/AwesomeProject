@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
 const RegistrationScreen = ({ navigation }) => {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -18,6 +19,10 @@ const RegistrationScreen = ({ navigation }) => {
   const handleRegistration = () => {
     let errorMessage = '';
 
+    if (!username) {
+      errorMessage += 'Username is required. ';
+    }
+
     if (!isEmailValid(email)) {
       errorMessage += 'Invalid email address. ';
     }
@@ -31,13 +36,14 @@ const RegistrationScreen = ({ navigation }) => {
       alert(errorMessage);
     } else {
       // Email and password are valid, implement your registration logic here
-      fetch('http://localhost:8080/register', {
+      fetch('http://localhost:8080/api/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: email,
+          username: username,
+          email: email,
           password: password,
         }),
       })
@@ -58,6 +64,12 @@ const RegistrationScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text>Registration Screen</Text>
+      <TextInput 
+        style={styles.input}
+        placeholder="Username"
+        onChangeText={(text) => setUsername(text)}
+        value={username}
+      />
       <TextInput
         style={styles.input}
         placeholder="Email"
