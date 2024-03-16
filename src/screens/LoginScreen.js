@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const LoginScreen = ({ navigation }) => {
   const apiCall = () => {
-      axios.post('http://localhost:8080/login', {
+      axios.post('http://localhost:8080/api/users/login', {
           username: username,
           password: password
       })

@@ -45,12 +45,27 @@ router.post('/register', async (req, res) => {
 // POST /api/users/login - Authenticate a user
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
+    console.log('username:', username);
 
-    // Check if username and password match the predefined credentials
-    if (username === validCredentials.username && password === validCredentials.password) {
+    try {
+        // Find the user by username
+        const user = await User.findOne({ username });
+
+        // If the user is not found, return an error
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid username or password' });
+        }
+
+        // Check if the provided password matches the user's password
+        if (password !== user.password) {
+            return res.status(401).json({ error: 'Invalid username or password' });
+        }
+
+        // If the username and password are correct, return a success message
         return res.status(200).json({ message: 'Login successful' });
-    } else {
-        return res.status(401).json({ error: 'Invalid username or password' });
+    } catch (error) {
+        console.error('Login failed:', error);
+        return res.status(500).json({ error: 'Login failed' });
     }
 });
 
