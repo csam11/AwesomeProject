@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const mongoose = require('mongoose');
+const auth = require('./middleware/auth');
 
 const validCredentials = {
     username: 'testuser',
@@ -26,6 +27,7 @@ app.listen(8080, () => {
 
 
 app.use('/api/users', require('./routes/users'));
+app.use('/api/activities', auth, require('./routes/activities'));
 
 app.post('/forgot-password', (req, res) => {
     const { email } = req.body;

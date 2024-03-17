@@ -3,6 +3,10 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const bycrypt = require('bcrypt');
+const config = require('config');
+const auth = require('../middleware/auth');
+
 
 // POST /api/users/register - Register a new user
 router.post('/register', async (req, res) => {
@@ -27,11 +31,18 @@ router.post('/register', async (req, res) => {
         // Create a new user instance
         const newUser = new User({ username, email, password }); // Assign email value to username
 
+        // Hash the password
+        const salt = await bycrypt.genSalt(10);
+        newUser.password = await bycrypt.hash(password, salt);
+
         // Save the new user to the database
         await newUser.save();
 
+        // Generate a JWT for the new user
+        const token = newUser.generateAuthToken();
+
         console.log('Registration successful');
-        return res.status(200).json({ message: 'Registration successful' });
+        res.header('x-auth-token', token).send({ _id: newUser._id, username: newUser.username, email: newUser.email });
         
     } catch (error) {
         console.error('Registration failed:', error);
@@ -56,13 +67,15 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid username or password' });
         }
 
-        // Check if the provided password matches the user's password
-        if (password !== user.password) {
+        // Compare the passwordHash with the provided password
+        const validPassword = await bycrypt.compare(password, user.password);
+        if (!validPassword) {
             return res.status(401).json({ error: 'Invalid username or password' });
         }
 
-        // If the username and password are correct, return a success message
-        return res.status(200).json({ message: 'Login successful' });
+        // Generate a JWT for the user
+        const token = user.generateAuthToken();
+        res.send({ token });
     } catch (error) {
         console.error('Login failed:', error);
         return res.status(500).json({ error: 'Login failed' });
