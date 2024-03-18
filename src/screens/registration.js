@@ -47,13 +47,16 @@ const RegistrationScreen = ({ navigation }) => {
           password: password,
         }),
       })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.message === 'Registration successful') {
-          navigation.navigate('GoalsScreen');
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json().then(data => {
+            // Registration was successful, navigate to the GoalsScreen
+            navigation.navigate('GoalsScreen');
+          });
         } else {
           // Handle error here
           console.error('Registration failed');
+          throw new Error('Registration failed');
         }
       })
       .catch((error) => console.error(error));
