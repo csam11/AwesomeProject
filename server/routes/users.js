@@ -42,7 +42,8 @@ router.post('/register', async (req, res) => {
         const token = newUser.generateAuthToken();
 
         console.log('Registration successful');
-        res.header('x-auth-token', token).json({ message: 'Registration successful', user: { _id: newUser._id, username: newUser.username, email: newUser.email } });
+        console.log(token);
+        res.json({ message: 'Registration successful', user: { _id: newUser._id, username: newUser.username, email: newUser.email }, token });
         
     } catch (error) {
         console.error('Registration failed:', error);

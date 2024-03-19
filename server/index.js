@@ -28,6 +28,7 @@ app.listen(8080, () => {
 
 app.use('/api/users', require('./routes/users'));
 app.use('/api/activities', auth, require('./routes/activities'));
+app.use('/api/goals',auth, require('./routes/goals'));
 
 app.post('/forgot-password', (req, res) => {
     const { email } = req.body;
