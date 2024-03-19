@@ -1,6 +1,8 @@
 // RegistrationScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const RegistrationScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -16,21 +18,21 @@ const RegistrationScreen = ({ navigation }) => {
     return password.length >= 13;
   };
 
-  const handleRegistration = () => {
+  const handleRegistration = async () => {
     let errorMessage = '';
-
+  
     if (!username) {
       errorMessage += 'Username is required. ';
     }
-
+  
     if (!isEmailValid(email)) {
       errorMessage += 'Invalid email address. ';
     }
-
+  
     if (!isPasswordValid(password)) {
       errorMessage += 'Password must be at least 13 characters long.';
     }
-
+  
     if (errorMessage) {
       // Display a consolidated error message if there are validation errors
       alert(errorMessage);
@@ -47,26 +49,26 @@ const RegistrationScreen = ({ navigation }) => {
           password: password,
         }),
       })
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json().then(data => {
-            // Registration was successful, navigate to the GoalsScreen
-
-            // Store the token in local storage
-            localStorage.setItem('token', data.token);
-            
-            navigation.navigate('GoalsScreen');
-          });
+      .then(async (response) => {
+        if (response.status === 200) {  
+          const data = await response.json();
+          const token = data.token;
+      
+          console.log('Token generated:', token);
+          await AsyncStorage.setItem('token', token);
+      
+          // Navigate to the next screen
+          navigation.navigate('GoalsScreen');
         } else {
           // Handle error here
-          console.error('Registration failed');
+          alert('Registration failed, account may already exist');
           throw new Error('Registration failed');
         }
       })
       .catch((error) => console.error(error));
     }
-
   };
+  
 
   return (
     <View style={styles.container}>

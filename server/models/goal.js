@@ -2,11 +2,6 @@
 
 const mongoose = require('mongoose');
 const goalSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
     currentWeight: {
         type: Number,
         required: true
@@ -15,12 +10,32 @@ const goalSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    activityPreferences: [
-        {
-            type: String,
-        }
-    ],
-    TargetCalories: {
+    height: {
+        type: Number,
+        required: true
+    },
+    age: {
+        type: Number,
+        required: true
+    },
+    sex: {
+        type: String,
+        required: true
+    },
+    weightRate: {
+        type: String,
+        required: true
+    },
+    targetCalories: {
+        type: Number,
+    },
+    targetProtein: {
+        type: Number,
+    },
+    targetFat: {
+        type: Number,
+    },
+    targetCarb: {
         type: Number,
     }
 }, {

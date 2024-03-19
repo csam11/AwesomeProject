@@ -1,69 +1,64 @@
-// GoalsScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Picker, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GoalsScreen = ({ navigation }) => {
   const [currentWeight, setCurrentWeight] = useState('');
   const [goalWeight, setGoalWeight] = useState('');
   const [height, setHeight] = useState('');
   const [age, setAge] = useState('');
-  const [sex, setSex] = useState(''); // Default to an empty string
+  const [sex, setSex] = useState('');
   const [rate, setRate] = useState('');
+  const [token, setToken] = useState('');
 
-  const calculateNutrition = () => {
-    // Implement your calorie and macronutrient calculation logic here
-    const calculatedCalories = calculateCalories(currentWeight, height, age, sex, rate);
-    const { protein, carbs, fats } = calculateMacronutrientRatio(calculatedCalories, currentWeight);
+  useEffect(() => {
+    const retrieveToken = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem('token'); // Use 'token' instead of 'x-auth-token'
+        setToken(storedToken);
+        console.log('Retrieved token from AsyncStorage:', storedToken);
 
-    //can be changed to be foodJournalScreen
-    navigation.navigate('WeightJournalScreen');
-    // Display the calculated information or navigate to another screen to display it
-    // alert(`calories: ${calculatedCalories}, Protein: ${protein}g, Carbs: ${carbs}g, Fats: ${fats}g`);
-  };
+      } catch (error) {
+        console.error('Error retrieving token:', error);
+      }
+    };
+  
+    retrieveToken();
+  }, []);
 
-  const calculateCalories = (currentWeight, height, age, sex, rate) => {
-    // Replace this with your own calorie calculation logic
-    const bmr = sex === 'male'
-      ? 88.362 + (13.397 * currentWeight) + (4.799 * height) - (5.677 * age)
-      : 447.593 + (9.247 * currentWeight) + (3.098 * height) - (4.330 * age);
+  console.log('Retrieved token from AsyncStorage:', token);
 
-    var totalCalories = bmr * 1.2; // Assuming a sedentary lifestyle
-
-    if (rate == "-1kg"){
-      totalCalories -= 1000
-    } 
-    if (rate == "-0.5kg"){
-      totalCalories -= 500
-    } 
-    if (rate == "+0.5kg"){
-      totalCalories += 500
-    } 
-    if (rate == "+1kg"){
-      totalCalories += 1000
-    } 
-
-    return totalCalories;
-  };
-
-  const calculateMacronutrientRatio = (calories, currentWeight) => {
-    // Set protein intake based on current weight, allocate the rest to carbs and fats
-    const proteinPerKg = 2.2; // Adjust this value based on your protein intake recommendation
-    const protein = proteinPerKg * currentWeight;
-    
-    // Calculate remaining calories after allocating protein
-    const remainingCalories = calories - (protein * 4); // 4 calories per gram of protein
-
-    // Allocate 50% to carbs and 30% to fats (adjust ratios based on your recommendation)
-    const carbs = remainingCalories * 0.6 / 4; // 4 calories per gram of carbs
-    const fats = remainingCalories * 0.4 / 9; // 9 calories per gram of fat
-
-    return { protein, carbs, fats };
-  };
-
-  const handleLogout = () => {
-    // Navigate to the LoginScreen when the logout button is pressed
-    navigation.navigate('Login');
-  };
+  
+  const handleGoalCreation = async () => {
+      // Your payload data
+      const payload = {
+        currentWeight: currentWeight,
+        goalWeight: goalWeight,
+        height: height,
+        age: age,
+        sex: sex,
+        weightRate: rate
+      };
+  
+      // Make the POST request with token in headers
+      fetch('http://localhost:8080/api/goals/calculate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token // Include the token in the headers
+        },
+        body: JSON.stringify(payload),
+      })
+      .then(async (response) => {
+          const data = await response.json();
+          alert(data.message);
+          // Navigate to next screen
+          navigation.navigate('WeightJournalScreen');
+      })
+      .catch((error) => console.error(error));
+      // Check the response status
+    };
+  
 
   return (
     <View style={styles.container}>
@@ -114,27 +109,22 @@ const GoalsScreen = ({ navigation }) => {
         <Picker.Item label="Female" value="female" />
       </Picker>
 
-      <Text style={styles.label}>weight gain/loss rate goals</Text>
+      <Text style={styles.label}>Weight gain/loss rate goals</Text>
       <Picker
         style={styles.input}
         selectedValue={rate}
         onValueChange={(itemValue) => setRate(itemValue)}
       >
-        <Picker.Item label="maintain weight" value="" />
-        <Picker.Item label="lose 1kg per week" value="-1kg" />
-        <Picker.Item label="lose 0.5kg per week" value="-0.5kg" />
-        <Picker.Item label="gain 0.5kg per week" value="+0.5kg" />
-        <Picker.Item label="gain 1kg per week" value="+1kg" />
+        <Picker.Item label="Maintain weight" value="" />
+        <Picker.Item label="Lose 1kg per week" value="-1kg" />
+        <Picker.Item label="Lose 0.5kg per week" value="-0.5kg" />
+        <Picker.Item label="Gain 0.5kg per week" value="+0.5kg" />
+        <Picker.Item label="Gain 1kg per week" value="+1kg" />
       </Picker>
       
-      <TouchableOpacity onPress={calculateNutrition}>
+      <TouchableOpacity onPress={handleGoalCreation}>
         <Text>Calculate Nutrition</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity onPress={handleLogout}>
-        <Text>Logout</Text>
-      </TouchableOpacity>
-      
     </View>
   );
 };
@@ -163,4 +153,3 @@ const styles = StyleSheet.create({
 });
 
 export default GoalsScreen;
-
