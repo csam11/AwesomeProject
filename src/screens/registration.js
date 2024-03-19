@@ -51,6 +51,10 @@ const RegistrationScreen = ({ navigation }) => {
         if (response.status === 200) {
           return response.json().then(data => {
             // Registration was successful, navigate to the GoalsScreen
+
+            // Store the token in local storage
+            localStorage.setItem('token', data.token);
+            
             navigation.navigate('GoalsScreen');
           });
         } else {

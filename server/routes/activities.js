@@ -7,7 +7,7 @@ const auth = require('../middleware/auth');
 // POST /api/activities - Add a new activity
 router.post('/', auth, async (req, res) => {
     try{
-        const { type, duration, caloriesBurned, date } = req.body;
+        const { type, duration, caloriesBurned, day } = req.body;
         const userId = req.user._id;
 
         const newActivity = new Activity({
@@ -15,7 +15,7 @@ router.post('/', auth, async (req, res) => {
             type,
             duration,
             caloriesBurned,
-            date
+            day
         });
 
         await newActivity.save();

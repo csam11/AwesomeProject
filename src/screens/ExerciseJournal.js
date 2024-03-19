@@ -41,6 +41,33 @@ const ExerciseJournalScreen = ({navigation}) => {
       exercise: selectedExercise,
     };
 
+    // retrieve token from local storage
+    const token = localStorage.getItem('token');
+
+    // make a POST request to the server to add the new exercise
+    fetch('http://localhost:8080/api/activities', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,  // attach the token as an authorization header
+      },
+      body: JSON.stringify({
+        type: newExercise.type,
+        duration: newExercise.duration,
+        caloriesBurned: newExercise.calories,
+        day: newExercise.day,
+      }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.message) {
+        console.log(data.message);
+      } 
+    })
+    .catch(error => {
+      console.error('Error adding exercise:', error);
+    });
+
     setAddedExercise(newExercise);
     
     // Update current value

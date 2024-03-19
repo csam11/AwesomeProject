@@ -11,6 +11,8 @@ const LoginScreen = ({ navigation }) => {
       })
       .then(response => {
           console.log(response.data.message); // Log the response from the server
+          // store the token in local storage
+          localStorage.setItem('token', response.data.token);
           navigation.navigate('WeightJournalScreen');
       })
       .catch(error => {
