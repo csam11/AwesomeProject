@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const LoginScreen = ({ navigation }) => {
 
-  const [showPrompt, setShowPrompt] = useState(false)
+  const [showPrompt, setShowPrompt] = useState(false);
 
   const apiCall = () => {
       axios.post('http://localhost:19006/api/users/login', {

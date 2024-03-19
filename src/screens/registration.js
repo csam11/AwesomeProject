@@ -1,11 +1,14 @@
 // RegistrationScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 
 const RegistrationScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+
 
   const isEmailValid = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -20,23 +23,24 @@ const RegistrationScreen = ({ navigation }) => {
     let errorMessage = '';
 
     if (!username) {
-      errorMessage += 'Username is required. ';
+      errorMessage += 'Username is required. \n';
     }
 
     if (!isEmailValid(email)) {
-      errorMessage += 'Invalid email address. ';
+      errorMessage += 'Invalid email address. \n';
     }
 
     if (!isPasswordValid(password)) {
-      errorMessage += 'Password must be at least 13 characters long.';
+      errorMessage += 'Password must be at least 13 characters long. \n' ;
     }
 
     if (errorMessage) {
       // Display a consolidated error message if there are validation errors
-      alert(errorMessage);
+      setErrorMessage(errorMessage);
+      setModalVisible(true); 
     } else {
       // Email and password are valid, implement your registration logic here
-      fetch('http://localhost:8080/api/users/register', {
+      fetch('http://localhost:19006/api/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,6 +90,29 @@ const RegistrationScreen = ({ navigation }) => {
       <TouchableOpacity onPress={handleRegistration}>
         <Text>Register</Text>
       </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>{errorMessage}</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setModalVisible(!modalVisible);
+              }}
+            >
+              <Text>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   );
 };
@@ -104,6 +131,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginVertical: 10,
     paddingHorizontal: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    marginBottom: 20,
   },
 });
 
