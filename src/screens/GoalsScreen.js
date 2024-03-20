@@ -30,6 +30,9 @@ const GoalsScreen = ({ navigation }) => {
 
   
   const handleGoalCreation = async () => {
+      const newWeightEntry = {
+      weight: currentWeight,
+      };
       // Your payload data
       const payload = {
         currentWeight: currentWeight,
@@ -57,6 +60,18 @@ const GoalsScreen = ({ navigation }) => {
       })
       .catch((error) => console.error(error));
       // Check the response status
+      const response = await fetch('http://localhost:8080/api/progress/addWeight', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+        body: JSON.stringify(newWeightEntry),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add weight');
+      }
     };
   
 
