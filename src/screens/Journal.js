@@ -34,6 +34,7 @@ const JournalScreen = ({navigation}) => {
   });
   const [totalFat, setTotalFat] = useState(0);
   const [totalCarbs, setTotalCarbs] = useState(0);
+  const [totalProtein, setTotalProtein] = useState(0);
   const [quantity, setQuantity] = useState('1'); 
   const [recentlyAddedFood, setRecentlyAddedFood] = useState(null);
 
@@ -41,13 +42,55 @@ const JournalScreen = ({navigation}) => {
 
 
   const foodOptions = [
-    { name: 'Eggs', calories: 70, fat: 5, carbs: 1 },
-    { name: 'Bacon', calories: 120, fat: 10, carbs: 0 },
-    { name: 'Toast', calories: 80, fat: 2, carbs: 15 },
-    { name: 'Salad', calories: 160, fat: 3, carbs: 10 },
-    { name: 'Burger', calories: 800, fat: 20, carbs: 25 },
-    { name: 'Pasta', calories: 750, fat: 5, carbs: 45 },
-    //more foods later
+    { name: 'Apple', calories: 95, fat: 0.3, carbs: 25, protein: 0.5 },
+    { name: 'Asparagus', calories: 20, fat: 0.2, carbs: 4, protein: 2.2 },
+    { name: 'Avocado', calories: 160, fat: 15, carbs: 9, protein: 2 },
+    { name: 'Bacon', calories: 120, fat: 10, carbs: 0, protein: 6 },
+    { name: 'Banana', calories: 105, fat: 0.4, carbs: 27, protein: 1.3 },
+    { name: 'Beef', calories: 250, fat: 16, carbs: 0, protein: 26 },
+    { name: 'Blueberries', calories: 57, fat: 0.3, carbs: 14, protein: 0.7 },
+    { name: 'Broccoli', calories: 55, fat: 0.6, carbs: 11, protein: 3.7 },
+    { name: 'Brussels Sprouts', calories: 38, fat: 0.3, carbs: 8, protein: 3 },
+    { name: 'Cabbage', calories: 25, fat: 0.1, carbs: 6, protein: 1.3 },
+    { name: 'Carrot', calories: 41, fat: 0.2, carbs: 10, protein: 0.9 },
+    { name: 'Cashews', calories: 553, fat: 44, carbs: 30, protein: 18 },
+    { name: 'Cauliflower', calories: 25, fat: 0.3, carbs: 5, protein: 2 },
+    { name: 'Celery', calories: 16, fat: 0.2, carbs: 3, protein: 0.7 },
+    { name: 'Cheese', calories: 113, fat: 9, carbs: 0.4, protein: 7 },
+    { name: 'Chicken Breast', calories: 165, fat: 3.6, carbs: 0, protein: 31 },
+    { name: 'Chicken Wings', calories: 203, fat: 12, carbs: 0, protein: 20 },
+    { name: 'Cherries', calories: 50, fat: 0.3, carbs: 12, protein: 1 },
+    { name: 'Cucumber', calories: 16, fat: 0.1, carbs: 4, protein: 0.7 },
+    { name: 'Eggplant', calories: 25, fat: 0.2, carbs: 6, protein: 1 },
+    { name: 'Eggs', calories: 70, fat: 5, carbs: 1, protein: 6 },
+    { name: 'Grapes', calories: 69, fat: 0.2, carbs: 18, protein: 0.7 },
+    { name: 'Green Beans', calories: 31, fat: 0.1, carbs: 7, protein: 1.8 },
+    { name: 'Kale', calories: 33, fat: 0.5, carbs: 6, protein: 2.2 },
+    { name: 'Lentils', calories: 230, fat: 0.8, carbs: 40, protein: 18 },
+    { name: 'Lettuce', calories: 5, fat: 0.1, carbs: 1, protein: 0.5 },
+    { name: 'Mango', calories: 60, fat: 0.4, carbs: 15, protein: 0.8 },
+    { name: 'Milk', calories: 103, fat: 2.4, carbs: 12, protein: 8 },
+    { name: 'Oatmeal', calories: 158, fat: 3.5, carbs: 27, protein: 6 },
+    { name: 'Onion', calories: 40, fat: 0.1, carbs: 9, protein: 1.1 },
+    { name: 'Orange', calories: 62, fat: 0.2, carbs: 15, protein: 1.2 },
+    { name: 'Pasta', calories: 750, fat: 5, carbs: 45, protein: 25 },
+    { name: 'Peach', calories: 59, fat: 0.4, carbs: 15, protein: 1.4 },
+    { name: 'Peanut Butter', calories: 190, fat: 16, carbs: 7, protein: 7 },
+    { name: 'Pepper', calories: 30, fat: 0.3, carbs: 7, protein: 1.2 },
+    { name: 'Pineapple', calories: 50, fat: 0.1, carbs: 13, protein: 0.5 },
+    { name: 'Pizza', calories: 300, fat: 12, carbs: 32, protein: 15 },
+    { name: 'Pork', calories: 242, fat: 16, carbs: 0, protein: 22 },
+    { name: 'Potato', calories: 161, fat: 0.2, carbs: 36, protein: 4.3 },
+    { name: 'Quinoa', calories: 222, fat: 4, carbs: 39, protein: 8 },
+    { name: 'Radish', calories: 16, fat: 0.1, carbs: 4, protein: 0.7 },
+    { name: 'Rice', calories: 130, fat: 0.3, carbs: 28, protein: 2.7 },
+    { name: 'Salad', calories: 160, fat: 3, carbs: 10, protein: 4 },
+    { name: 'Shrimp', calories: 84, fat: 0.2, carbs: 0.2, protein: 20 },
+    { name: 'Spinach', calories: 23, fat: 0.4, carbs: 3.6, protein: 2.9 },
+    { name: 'Steak', calories: 679, fat: 49, carbs: 0, protein: 61 },
+    { name: 'Strawberries', calories: 33, fat: 0.3, carbs: 8, protein: 0.7 },
+    { name: 'Sushi', calories: 450, fat: 16, carbs: 55, protein: 20 },
+    { name: 'Tomato', calories: 18, fat: 0.2, carbs: 4, protein: 0.9 },
   ];
   
 
@@ -87,7 +130,7 @@ const JournalScreen = ({navigation}) => {
   const addCaloriesToPeriod = () => {
     if (selectedFood !== '' && selectedTimeOfDay !== '') {
       const foodObj = foodOptions.find((food) => food.name === selectedFood);
-      const quantityValue = parseInt(quantity, 10) || 1; //make sure the quantity is an integer for food
+      const quantityValue = parseInt(quantity, 10) || 1; // Make sure the quantity is an integer for food
   
       if (foodObj) {
         const updatedSelectedTime = { ...selectedTime };
@@ -96,21 +139,24 @@ const JournalScreen = ({navigation}) => {
           calories: foodObj.calories * quantityValue,
           fat: foodObj.fat * quantityValue,
           carbs: foodObj.carbs * quantityValue,
+          protein: foodObj.protein * quantityValue, // Include protein calculation
           quantity: quantityValue,
         };
   
         updatedSelectedTime[selectedTimeOfDay].push(foodItem);
         setSelectedTime(updatedSelectedTime);
   
-        //update total fat and carbs
+        // Update total fat, carbs, and protein
         const updatedTotalFat = totalFat + foodObj.fat * quantityValue;
         const updatedTotalCarbs = totalCarbs + foodObj.carbs * quantityValue;
+        const updatedTotalProtein = totalProtein + foodObj.protein * quantityValue;
         setTotalFat(updatedTotalFat);
         setTotalCarbs(updatedTotalCarbs);
+        setTotalProtein(updatedTotalProtein);
   
-        setSelectedFood(''); 
-        setQuantity('1'); 
-        
+        setSelectedFood('');
+        setQuantity('1');
+  
         setRecentlyAddedFood(foodItem);
       }
     }
@@ -276,12 +322,14 @@ const renderLineChart = () => {
     const handleRemoveFood = (timeOfDay, index) => {
       const updatedSelectedTime = { ...selectedTime };
       const removedFood = updatedSelectedTime[timeOfDay].splice(index, 1)[0];
-      
-      //update total fat and carbs relative to the time of day, this will also extend more nutrientations
+    
+      // Update total fat, carbs, and protein when removing food
       const updatedTotalFat = totalFat - removedFood.fat;
       const updatedTotalCarbs = totalCarbs - removedFood.carbs;
+      const updatedTotalProtein = totalProtein - removedFood.protein;
       setTotalFat(updatedTotalFat);
       setTotalCarbs(updatedTotalCarbs);
+      setTotalProtein(updatedTotalProtein);
     
       setSelectedTime(updatedSelectedTime);
     };
@@ -312,6 +360,7 @@ const renderLineChart = () => {
           {renderPieChart('calories')}
           {renderPieChart('fat')} 
           {renderPieChart('carbs')} 
+          {renderPieChart('protein')}
           </View>
         </View>
         <View style={styles.square}>
@@ -367,6 +416,7 @@ const renderLineChart = () => {
           <Text>Total Calories: {calculateTotalCalories('morning')}</Text>
           <Text>Total Fat: {selectedTime.morning.reduce((total, food) => total + food.fat, 0)}g</Text>
           <Text>Total Carbs: {selectedTime.morning.reduce((total, food) => total + food.carbs, 0)}g</Text>
+          <Text>Total Protein: {selectedTime.morning.reduce((total, food) => total + food.protein, 0)}g</Text>
           <View>
           {selectedTime.morning.map((food, index) => (
           <TouchableOpacity key={index} onPress={() => handleRemoveFood('morning', index)}>
@@ -380,6 +430,7 @@ const renderLineChart = () => {
           <Text>Total Calories: {calculateTotalCalories('afternoon')}</Text>
           <Text>Total Fat: {selectedTime.afternoon.reduce((total, food) => total + food.fat, 0)}g</Text>
           <Text>Total Carbs: {selectedTime.afternoon.reduce((total, food) => total + food.carbs, 0)}g</Text>
+          <Text>Total Protein: {selectedTime.afternoon.reduce((total, food) => total + food.protein, 0)}g</Text>
           <View>
           {selectedTime.afternoon.map((food, index) => (
           <TouchableOpacity key={index} onPress={() => handleRemoveFood('afternoon', index)}>
@@ -393,6 +444,7 @@ const renderLineChart = () => {
           <Text>Total Calories: {calculateTotalCalories('night')}</Text>
           <Text>Total Fat: {selectedTime.night.reduce((total, food) => total + food.fat, 0)}g</Text>
           <Text>Total Carbs: {selectedTime.night.reduce((total, food) => total + food.carbs, 0)}g</Text>
+          <Text>Total Protein: {selectedTime.night.reduce((total, food) => total + food.protein, 0)}g</Text>
           <View>
           {selectedTime.night.map((food, index) => (
           <TouchableOpacity key={index} onPress={() => handleRemoveFood('night', index)}>
