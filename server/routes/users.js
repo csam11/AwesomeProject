@@ -76,7 +76,7 @@ router.post('/login', async (req, res) => {
 
         // Generate a JWT for the user
         const token = user.generateAuthToken();
-        res.send({ token });
+        res.json({ token });
     } catch (error) {
         console.error('Login failed:', error);
         return res.status(500).json({ error: 'Login failed' });

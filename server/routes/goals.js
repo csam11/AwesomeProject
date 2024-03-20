@@ -13,6 +13,7 @@ router.post('/calculate', auth, async (req, res) => {
         const { protein, carbs, fats } = calculateMacronutrientRatio(targetCalories, currentWeight);
 
         const newGoal = new Goal({
+            user,
             currentWeight,
             goalWeight,
             height,
@@ -32,6 +33,21 @@ router.post('/calculate', auth, async (req, res) => {
         console.error('Failed to create goals:', error);
         res.status(500).json({ error: 'Failed to create goals' });
     }
+});
+
+router.get('/weightGoalTrack', auth, async (req, res) => {
+  try {
+      const userId = req.user._id; // Assuming you have middleware to extract user ID from token
+
+      // Find the user's progress document
+      const goal = await Goal.findOne({ user: userId }).populate('goalWeight');
+
+      // Respond with weightTrack data
+      res.json({ goalWeight: goal.goalWeight });
+  } catch (error) {
+      console.error('Error fetching goalWeight data:', error);
+      res.status(500).json({ error: 'Failed to fetch goalWeight data.' });
+  }
 });
 
 // Function to calculate total calories
