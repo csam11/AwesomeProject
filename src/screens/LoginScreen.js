@@ -1,19 +1,39 @@
 // LoginScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const LoginScreen = ({ navigation }) => {
-  const apiCall = () => {
-      axios.post('http://localhost:8080/api/users/login', {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const apiCall = async () => {
+      fetch('http://localhost:8080/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           username: username,
-          password: password
+          password: password,
+        }),
       })
-      .then(response => {
-          console.log(response.data.message); // Log the response from the server
-          // store the token in local storage
-          localStorage.setItem('token', response.data.token);
+      .then(async response => {
+        if (response.status === 200) {  
+          const data = await response.json();
+          const token = data.token;
+      
+          console.log('Token generated:', token);
+          await AsyncStorage.setItem('token', token);
+      
+          // Navigate to the next screen
           navigation.navigate('WeightJournalScreen');
+        } else {
+          // Handle error here
+          alert('Login failed');
+          throw new Error('Login failed');
+        }
       })
       .catch(error => {
           alert('Login failed. ' + error.response.data.error);
@@ -21,8 +41,6 @@ const LoginScreen = ({ navigation }) => {
           setPassword('');
       });
   };
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
 
   return (
     <View style={styles.container}>
