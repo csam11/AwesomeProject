@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native'; // Import the useFocusEffect hook
+
 
 const WeightJournalScreen = ({ navigation }) => {
   const [weight, setWeight] = useState('');
@@ -11,6 +13,21 @@ const WeightJournalScreen = ({ navigation }) => {
   const [token, setToken] = useState('');
   const [goalWeight, setGoalWeight] = useState('');
 
+    // Fetch weight data when the screen comes into focus
+    useFocusEffect(
+      React.useCallback(() => {
+        const fetchData = async () => {
+          await fetchWeightData(token);
+        };
+        fetchData();
+  
+        // Clean up function
+        return () => {
+          // You can perform any cleanup here if needed
+        };
+      }, [token]) // Re-run effect when token changes
+    );
+
 
   useEffect(() => {
     const retrieveToken = async () => {
@@ -19,7 +36,7 @@ const WeightJournalScreen = ({ navigation }) => {
         setToken(storedToken);
 
         // Fetch weight data when the component mounts
-        fetchWeightData(storedToken);
+        // fetchWeightData(storedToken);
       } catch (error) {
         console.error('Error retrieving token:', error);
       }
@@ -297,8 +314,15 @@ const chartData = {
     navigation.navigate('SleepJournal');
   };
 
+  const handleGoals = () => {
+    navigation.navigate('AdjustGoalsScreen');
+  };
+
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.adjustButton} onPress={handleGoals}>
+        <Text>Adjust Goals</Text>
+      </TouchableOpacity>
       <Text>Weight Journal Screen</Text>
       <LineChart
         data={chartData}
@@ -408,6 +432,15 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   bottomButton: {
+    backgroundColor: '#ccc',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  adjustButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
     backgroundColor: '#ccc',
     paddingVertical: 10,
     paddingHorizontal: 20,

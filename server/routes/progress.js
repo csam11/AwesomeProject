@@ -29,6 +29,33 @@ router.post('/addWeight', auth, async (req, res) => {
     }
 });
 
+router.post('/adjustWeight', auth, async (req, res) => {
+  try {
+      const { weight, date } = req.body; // Extract weight and date from request body
+      const userId = req.user._id; // Assuming you have middleware to extract user ID from token
+      
+      // Create a new weight entry object
+      const newWeightEntry = {
+          weight: parseFloat(weight),
+          date: date,
+      };
+
+        // Find the user's progress document
+        let progress = await Progress.findOne({ user: userId });
+
+          // remove all existing weight entries and add the new weight entry
+          progress.weightTrack = [newWeightEntry];
+          await progress.save();
+
+      // Respond with a success message or the updated progress data
+      res.json({ message: "success", progress });
+  } catch (error) {
+      console.error('Error adding weight:', error);
+      res.status(500).json({ error: 'Failed to add weight.' });
+  }
+});
+
+
 router.get('/weightTrack', auth, async (req, res) => {
     try {
         const userId = req.user._id; // Assuming you have middleware to extract user ID from token
