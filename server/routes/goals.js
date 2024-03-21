@@ -5,35 +5,56 @@ const Goal = require('../models/goal');
 
 // POST /api/goals/calculate - Create user goals
 router.post('/calculate', auth, async (req, res) => {
-    try {
-        const user = req.user._id;
-        const { currentWeight, goalWeight, height, age, sex, weightRate } = req.body;
-        // Calculate total calories based on the provided information
-        const targetCalories = calculateCalories(currentWeight, height, age, sex, weightRate);
-        const { protein, carbs, fats } = calculateMacronutrientRatio(targetCalories, currentWeight);
+  try {
+      const user = req.user._id;
+      const { currentWeight, goalWeight, height, age, sex, weightRate } = req.body;
+      // Calculate total calories based on the provided information
+      const targetCalories = calculateCalories(currentWeight, height, age, sex, weightRate);
+      const { protein, carbs, fats } = calculateMacronutrientRatio(targetCalories, currentWeight);
 
-        const newGoal = new Goal({
-            user,
-            currentWeight,
-            goalWeight,
-            height,
-            age,
-            sex,
-            weightRate,
-            targetCalories,
-            targetProtein: protein, // Corrected property name
-            targetFat: fats, // Corrected property name
-            targetCarb: carbs // Corrected property name
-        });
-        await newGoal.save();
+      // Check if a goal document already exists for the user
+      let existingGoal = await Goal.findOne({ user });
 
-        // Respond with a success message or the saved goal data
-        res.json({ message: "saving successful" });
-    } catch (error) {
-        console.error('Failed to create goals:', error);
-        res.status(500).json({ error: 'Failed to create goals' });
-    }
+      if (existingGoal) {
+          // Update the existing goal document
+          existingGoal.currentWeight = currentWeight;
+          existingGoal.goalWeight = goalWeight;
+          existingGoal.height = height;
+          existingGoal.age = age;
+          existingGoal.sex = sex;
+          existingGoal.weightRate = weightRate;
+          existingGoal.targetCalories = targetCalories;
+          existingGoal.targetProtein = protein;
+          existingGoal.targetFat = fats;
+          existingGoal.targetCarb = carbs;
+
+          await existingGoal.save();
+      } else {
+          // Create a new goal document
+          const newGoal = new Goal({
+              user,
+              currentWeight,
+              goalWeight,
+              height,
+              age,
+              sex,
+              weightRate,
+              targetCalories,
+              targetProtein: protein,
+              targetFat: fats,
+              targetCarb: carbs
+          });
+          await newGoal.save();
+      }
+
+      // Respond with a success message
+      res.json({ message: "Goal saved successfully" });
+  } catch (error) {
+      console.error('Failed to create or update goals:', error);
+      res.status(500).json({ error: 'Failed to create or update goals' });
+  }
 });
+
 
 router.get('/weightGoalTrack', auth, async (req, res) => {
   try {
