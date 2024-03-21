@@ -12,6 +12,7 @@ const GoalsScreen = ({ navigation }) => {
   const [token, setToken] = useState('');
 
   useEffect(() => {
+    setRate("0kg")
     const retrieveToken = async () => {
       try {
         const storedToken = await AsyncStorage.getItem('token'); // Use 'token' instead of 'x-auth-token'
@@ -130,7 +131,7 @@ const GoalsScreen = ({ navigation }) => {
         selectedValue={rate}
         onValueChange={(itemValue) => setRate(itemValue)}
       >
-        <Picker.Item label="Maintain weight" value="" />
+        <Picker.Item label="Maintain weight" value="0kg" />
         <Picker.Item label="Lose 1kg per week" value="-1kg" />
         <Picker.Item label="Lose 0.5kg per week" value="-0.5kg" />
         <Picker.Item label="Gain 0.5kg per week" value="+0.5kg" />
