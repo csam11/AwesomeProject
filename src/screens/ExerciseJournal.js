@@ -9,10 +9,14 @@ import DurationInput from '../ExerciseJournal/DurationInput';
 import ExercisePicker from '../ExerciseJournal/ExercisePicker';
 import BarChartComponent from '../ExerciseJournal/BarChartComponent'; 
 import Title from '../ExerciseJournal/Title';
+import HistoricalActivities from '../ExerciseJournal/HistoricalActivities';
+
+
 
 const ExerciseJournalScreen = ({navigation}) => {
   const [selectedExerciseType, setSelectedExerciseType] = useState('');
-  const [selectedDay, setSelectedDay] = useState('');
+  //const [selectedDay, setSelectedDay] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
   const [calories, setCalories] = useState('');
   const [duration, setDuration] = useState('');
   const [selectedExercise, setSelectedExercise] = useState(null);
@@ -22,6 +26,8 @@ const ExerciseJournalScreen = ({navigation}) => {
   const [progress, setProgress] = useState(0);
   const [currentValue, setCurrentValue] = useState(0);
   const [goal, setGoal] = useState(500);
+  const [activities, setActivities] = useState([]); // new state to store activities retrieved from the server
+  const [lastSevenDays, setLastSevenDays] = useState([]); // new state to store the last seven days of activities
   const [dayCalories, setDayCalories] = useState({
     Monday: 0,
     Tuesday: 0,
@@ -32,13 +38,67 @@ const ExerciseJournalScreen = ({navigation}) => {
     Sunday: 0,
   });
 
+  // retrieve activities from the server
+  useEffect(() => {
+    // retrieve token from local storage
+    const token = localStorage.getItem('token');
+    fetch('http://localhost:8080/api/activities', {
+      method: 'GET',
+      headers: {
+        'x-auth-token': token,  // attach the token as an authorization header
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Retrieved activities:', data);
+      setActivities(data);
+
+     
+
+      const newLastSevenDays = [];
+      for (let i = 0; i < 7; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const totalCalories = data
+          .filter(activity => {
+            // Convert both dates to YYYY-MM-DD format for comparison
+            const activityDate = new Date(activity.date).toISOString().split('T')[0];
+            const currentDate = date.toISOString().split('T')[0];
+            return activityDate === currentDate;
+          })
+          .reduce((total, activity) => total + activity.caloriesBurned, 0);
+        newLastSevenDays.push({ date: date.toDateString(), calories: totalCalories });
+      }
+      // check if the current day is different from the last day in lastSevenDays
+      const today = new Date().toISOString().split('T')[0];
+      let lastDay;
+      if (newLastSevenDays.length > 0) {
+        lastDay = new Date(newLastSevenDays[newLastSevenDays.length - 1].date).toISOString().split('T')[0];
+      }
+      //const lastDay = new Date(lastSevenDays[lastSevenDays.length - 1].date).toISOString().split('T')[0];
+      if (lastDay && today !== lastDay) {
+        if (lastSevenDays.length === 7) {
+          newLastSevenDays.shift(); // remove the oldest day
+        }
+        newLastSevenDays.push({ date: new Date().toDateString(), calories: 0 }); // add a new day
+      }
+      setLastSevenDays(newLastSevenDays);
+      console.log('Last seven days:', newLastSevenDays);
+    })
+    .catch(error => {
+      console.error('Error retrieving activities:', error);
+    });
+  }, []);
+
+  // Function to handle adding a new exercise
   const handleAddExercise = () => {
     const newExercise = {
       type: selectedExerciseType,
-      day: selectedDay,
+      date: selectedDate,
       calories: parseInt(calories),
       duration: duration,
       exercise: selectedExercise,
+      //date: new Date(),
     };
 
     // retrieve token from local storage
@@ -55,7 +115,7 @@ const ExerciseJournalScreen = ({navigation}) => {
         type: newExercise.type,
         duration: newExercise.duration,
         caloriesBurned: newExercise.calories,
-        day: newExercise.day,
+        date: new Date(newExercise.date)
       }),
     })
     .then(response => response.json())
@@ -63,7 +123,42 @@ const ExerciseJournalScreen = ({navigation}) => {
       if(data.message) {
         console.log(data.message);
       } 
+      // update lastSevenDays with the new exercise
+      const today = new Date().toISOString().split('T')[0];
+      setLastSevenDays(prevLastSevenDays => {
+        const newLastSevenDays = prevLastSevenDays.map(day => {
+          if (day.date && !isNaN(new Date(day.date))) {
+            const dayDate = new Date(day.date).toISOString().split('T')[0];
+            if (dayDate === today) {
+              return { ...day, calories: day.calories + newExercise.calories };
+            }
+          }
+          return day;
+        })
+        if(newLastSevenDays.length === 7) {
+          newLastSevenDays.shift(); // remove the oldest day
+        }
+        const exerciseDate = typeof newExercise.date === 'string' ? newExercise.date : new Date(newExercise.date).toDateString();
+        newLastSevenDays.push({ date: exerciseDate, calories: newExercise.calories });
+        console.log('Last seven days:', newLastSevenDays);
+        return newLastSevenDays;
+      });
+
+      // update activities with the new exercise
+    setActivities(prevActivities => {
+      const newActivity = {
+        type: newExercise.type,
+        date: new Date(newExercise.date),
+        caloriesBurned: newExercise.calories,
+        duration: newExercise.duration,
+        exercise: newExercise.exercise,
+    };
+    return [...prevActivities, newActivity];
+  });
+
+
     })
+  
     .catch(error => {
       console.error('Error adding exercise:', error);
     });
@@ -77,13 +172,13 @@ const ExerciseJournalScreen = ({navigation}) => {
   // Update calories for the selected day
     setDayCalories(prevDayCalories => ({
       ...prevDayCalories,
-      [selectedDay]: (prevDayCalories[selectedDay] || 0) + parseInt(calories),
+      [selectedDate]: (prevDayCalories[selectedDate] || 0) + parseInt(calories),
     }));
 
 
     // Reset form
     setSelectedExerciseType('');
-    setSelectedDay('');
+    //setSelectedDay('');
     setCalories('');
     setDuration('');
     setSelectedExercise(null);
@@ -122,10 +217,13 @@ const ExerciseJournalScreen = ({navigation}) => {
         currentValue={currentValue}
         goal={goal}
       />
-  
-      <BarChartComponent
+
+      <HistoricalActivities lastSevenDays={lastSevenDays} />
+
+      {/* <BarChartComponent
         dayCalories={dayCalories}
-      />
+        
+      /> */}
   
       {/* Added buttons */}
       <View style={styles.bottomButtonsContainer}>
@@ -149,9 +247,9 @@ const ExerciseJournalScreen = ({navigation}) => {
         exerciseTypes={exerciseTypes}
       />
       <DayPicker
-        selectedDay={selectedDay}
-        onDayChange={setSelectedDay}
-        daysOfWeek={daysOfWeek}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        // daysOfWeek={daysOfWeek}
       />
       <CaloriesInput
         calories={calories}

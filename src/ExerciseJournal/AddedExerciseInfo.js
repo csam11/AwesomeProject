@@ -26,7 +26,7 @@ const AddedExerciseInfo = ({ addedExercise }) => (
     <Text style={styles.info}>Exercise: {addedExercise.exercise}</Text>
     <Text style={styles.info}>Calories Burned: {addedExercise.calories}</Text>
     <Text style={styles.info}>Duration: {addedExercise.duration} minutes</Text>
-    <Text style={styles.info}>Day: {addedExercise.day}</Text>
+    <Text style={styles.info}>Date: {new Date(addedExercise.date).toLocaleDateString()}</Text>
   </View>
 );
 
