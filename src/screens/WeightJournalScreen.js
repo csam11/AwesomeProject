@@ -24,9 +24,92 @@ const WeightJournalScreen = ({ navigation }) => {
         console.error('Error retrieving token:', error);
       }
     };
-    fetchWeightData();
     retrieveToken();
   }, []);
+
+  function maintainCalculation(data,GW) {
+    const averageWeight = data.reduce((acc, curr) => acc + curr, 0) / data.length;
+    console.log(data[0], averageWeight, GW);
+
+    let suggestion = "you're doing great keep it up!";
+    
+    if (averageWeight <= GW-1.5 && (averageWeight <= data[0]-1.5)) {
+        suggestion = "based on the data provided we reccomend a +1000 increase to calories";
+    } else if (averageWeight >= GW+1.5 && (averageWeight >= data[0]+1.5)) {
+        suggestion = "based on the data provided we reccomend a -1000 increase to calories";
+    } else if (averageWeight <= GW-0.75 && (averageWeight <= data[0]-0.75)) {
+      suggestion = "based on the data provided we reccomend a +500 increase to calories";
+    } else if (averageWeight >= GW+0.75 && (averageWeight >= data[0]+0.75)) {
+      suggestion = "based on the data provided we reccomend a +500 increase to calories";
+    }
+    
+    console.log(suggestion);
+    alert(suggestion);
+  }
+
+  function gain1kgCalculation(data,GW) {
+    const averageWeight = data.reduce((acc, curr) => acc + curr, 0) / data.length;
+    console.log(data[0], averageWeight, GW);
+
+    let suggestion = "you're doing great keep it up!";
+    
+    if (averageWeight < GW-1.5 && (averageWeight <= data[0])) {
+      suggestion = "based on the data provided we reccomend a +1000 increase to calories";
+    } else if (averageWeight < GW-0.75 && (averageWeight <= data[0]+0.75)) {
+      suggestion = "+based on the data provided we reccomend a +500 increase to calories";
+    } 
+    
+    console.log(suggestion);
+    alert(suggestion);
+  }
+
+  function gain05kgCalculation(data,GW) {
+    const averageWeight = data.reduce((acc, curr) => acc + curr, 0) / data.length;
+    console.log(data[0], averageWeight, GW);
+
+    let suggestion = "you're doing great keep it up!";
+    
+    if (averageWeight < GW-1.5 && (averageWeight <= data[0]-0.75)) {
+      suggestion = "based on the data provided we reccomend a +1000 increase to calories";
+    } else if (averageWeight < GW-0.75 && (averageWeight <= data[0])) {
+      suggestion = "based on the data provided we reccomend a +500 increase to calories";
+    } 
+    
+    console.log(suggestion);
+    alert(suggestion);
+  }
+  //inputs are weight data array and goal weight
+  function lose1kgCalculation(data,GW) {
+    const averageWeight = data.reduce((acc, curr) => acc + curr, 0) / data.length;
+    console.log(data[0], averageWeight, GW);
+
+    let suggestion = "you're doing great keep it up!";
+    
+    if (averageWeight > GW-1.5 && (averageWeight >= data[0])) {
+      suggestion = "based on the data provided we reccomend a -1000 decrease to calories";
+    } else if (averageWeight > GW-0.75 && (averageWeight >= data[0]-0.75)) {
+      suggestion = "based on the data provided we reccomend a -500 decrease to calories";
+    } 
+    
+    console.log(suggestion);
+    alert(suggestion);
+  }
+
+  function lose05kgCalculation(data,GW) {
+    const averageWeight = data.reduce((acc, curr) => acc + curr, 0) / data.length;
+    console.log(data[0], averageWeight, GW);
+
+    let suggestion = "you're doing great keep it up!";
+    
+    if (averageWeight > GW-1.5 && (averageWeight >= data[0]+0.75)) {
+      suggestion = "based on the data provided we reccomend a -1000 decrease to calories";
+    } else if (averageWeight > GW-0.75 && (averageWeight >= data[0])) {
+      suggestion = "based on the data provided we reccomend a -500 decrease to calories";
+    } 
+    
+    console.log(suggestion);
+    alert(suggestion);
+  }
 
   const fetchWeightData = async (token) => {
     try {
@@ -63,7 +146,82 @@ const WeightJournalScreen = ({ navigation }) => {
 
       // Update weightData state with the retrieved data
       setGoalWeight(goalResData.goalWeight);
-      console.log(goalWeight)
+      console.log("goal weight:",goalResData.goalWeight)
+
+      const weightRate = await fetch('http://localhost:8080/api/goals/weightRate', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+      });
+      const weightRateData = await weightRate.json();
+      const weightRateExtract = weightRateData.weightRate; // Extract the weight rate from the response object
+      // console.log(weightRateExtract)
+      let weightRateValue;
+
+      //set the weightrate value for use in functions
+      if (weightRateExtract === "0kg") {
+        weightRateValue = 0;
+      } else if (weightRateExtract === "+1kg") {
+        weightRateValue = 1;
+      } else if (weightRateExtract === "+0.5kg") {
+        weightRateValue = 0.5;
+      } else if (weightRateExtract === "-1kg") {
+        weightRateValue = -1;
+      } else if (weightRateExtract === "-0.5kg") {
+        weightRateValue = -0.5;
+      } else {
+        // If weightRateData doesn't match any of the expected values
+        // handle this case accordingly, for example:
+        console.log("Unknown weight rate:", weightRateExtract, weightRateValue);
+      }
+      console.log("weight rate:", weightRateExtract, weightRateValue);
+      
+      // Now, you can use the weightRateValue variable as needed
+      // For example, you can pass it to a function or use it in calculations
+      
+
+      const fourWeeks = await fetch('http://localhost:8080/api/progress/lastFourWeeks', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+      });
+
+      if (!fourWeeks.ok) {
+        throw new Error('Failed to fetch weight data');
+      }
+
+      const fourWeeksData = await fourWeeks.json();
+
+      console.log("4 week data:",fourWeeksData);
+      const weightValues = fourWeeksData.weightTrackPairs.map(pair => pair.weight);
+      // console.log("justweight",weightValues);
+      
+      //calculate the suggestions based on inputs from last 4 weeks 
+      if(weightRateValue == 0){
+      maintainCalculation(weightValues,goalResData.goalWeight);
+      console.log("maintain function")
+      } else
+      if(weightRateValue == 1){
+        gain1kgCalculation(weightValues,goalResData.goalWeight);
+        console.log("gain 1kg function")
+      } else
+      if(weightRateValue== -1){
+        lose1kgCalculation(weightValues,goalResData.goalWeight)
+        console.log("lose 1kg function")
+      } else
+      if(weightRateValue == 0.5){
+        gain05kgCalculation(weightValues,goalResData.goalWeight);
+        console.log("gain 0.5kg function")
+      } else
+      if(weightRateValue== -0.5){
+        lose05kgCalculation(weightValues,goalResData.goalWeight)
+        console.log("lose 0.5kg function")
+      }
+      
     } catch (error) {
       console.error('Error retrieving goal weight data:', error);
     }

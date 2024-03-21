@@ -43,7 +43,23 @@ router.get('/weightGoalTrack', auth, async (req, res) => {
       const goal = await Goal.findOne({ user: userId }).populate('goalWeight');
 
       // Respond with weightTrack data
+      console.log(goal.goalWeight);
       res.json({ goalWeight: goal.goalWeight });
+  } catch (error) {
+      console.error('Error fetching goalWeight data:', error);
+      res.status(500).json({ error: 'Failed to fetch goalWeight data.' });
+  }
+});
+
+router.get('/weightRate', auth, async (req, res) => {
+  try {
+      const userId = req.user._id; // Assuming you have middleware to extract user ID from token
+
+      // Find the user's progress document
+      const weightRate = await Goal.findOne({ user: userId }).populate('weightRate');
+
+      // Respond with weightRate data
+      res.json({ weightRate: weightRate.weightRate });
   } catch (error) {
       console.error('Error fetching goalWeight data:', error);
       res.status(500).json({ error: 'Failed to fetch goalWeight data.' });
