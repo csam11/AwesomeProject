@@ -1,189 +1,222 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Picker, Button, Dimensions } from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
-
-const AddedSleepInfo = ({ addedSleep }) => {
-  return (
-    <View>
-      <Text>Recently Added Sleep:</Text>
-      <Text>Day: {addedSleep.day}</Text>
-      <Text>Duration: {addedSleep.duration} minutes</Text>
-    </View>
-  );
-};
+import { View, Text, StyleSheet, TextInput, Button, Modal, TouchableOpacity, Alert } from 'react-native';
+import { Calendar } from 'react-native-calendars';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SleepJournalScreen = ({ navigation }) => {
-  const [currentDay, setCurrentDay] = useState('');
-  const [currentTime, setCurrentTime] = useState('');
-  const [selectedDay, setSelectedDay] = useState('');
-  const [sleepDuration, setSleepDuration] = useState('');
-  const [selectedTime, setSelectedTime] = useState({
-    Monday: [],
-    Tuesday: [],
-    Wednesday: [],
-    Thursday: [],
-    Friday: [],
-    Saturday: [],
-    Sunday: [],
-  });
-  const [recentlyAddedSleep, setRecentlyAddedSleep] = useState(null);
-  const [goal, setGoal] = useState(500);
-  const [currentValue, setCurrentValue] = useState(0);
-  const [progress, setProgress] = useState((currentValue / goal) * 100);
+  const [token, setToken] = useState('');
+  const [sleepIn, setSleep] = useState('');
+  const [dateIn, setDate] = useState('');
+  const [markedDates, setSleepData] = useState({});
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [bedtime, setBedtime] = useState('');
+  const [isBedtimeModalVisible, setBedtimeModalVisible] = useState(false);
 
-  const handleDayChange = (value) => {
-    setSelectedDay(value);
-  };
+  const handleBedtime = async () => {
+    const newBedtimeEntry = {
+      bedtime: bedtime
+    };
+    try {
+      const response = await fetch('http://localhost:8080/api/sleep/bedtime', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+        body: JSON.stringify(newBedtimeEntry),
+      });
 
-  const handleSleepDurationChange = (text) => {
-    setSleepDuration(text);
-  };
+      if (!response.ok) {
+        throw new Error('Failed to add sleep');
+      }
 
-  const addSleepToPeriod = () => {
-    if (selectedDay !== '' && sleepDuration !== '') {
-      const updatedSelectedTime = { ...selectedTime };
-
-      const sleepItem = {
-        day: selectedDay,
-        duration: parseInt(sleepDuration, 10),
-      };
-
-      updatedSelectedTime[selectedDay].push(sleepItem);
-      setSelectedTime(updatedSelectedTime);
-
-      const updatedCurrentValue = calculateAllTotalSleepDuration();
-      setCurrentValue(updatedCurrentValue);
-
-      setSelectedDay('');
-      setSleepDuration('');
-      setRecentlyAddedSleep(sleepItem);
-
-      const updatedData = {
-        labels: Object.keys(updatedSelectedTime),
-        datasets: [
-          {
-            data: Object.values(updatedSelectedTime).map((sleeps) =>
-              sleeps.reduce((totalDuration, sleep) => totalDuration + sleep.duration, 0)
-            ),
-          },
-        ],
-      };
-      setChartData(updatedData);
-
-      updateProgressBar();
+      setBedtime('');
+      setBedtimeModalVisible(false);
+      const responseData = await response.json();
+      console.log(responseData);
+    } catch (error) {
+      console.error('Error adding sleep:', error);
     }
   };
 
-  const calculateAllTotalSleepDuration = () => {
-    const allSleepDuration = Object.values(selectedTime)
-      .flat()
-      .reduce((totalDuration, sleep) => {
-        return totalDuration + sleep.duration;
-      }, 0);
-    return allSleepDuration;
-  };
-
-  const ProgressBar = ({ progress }) => {
-    return (
-      <View style={styles.progressBarContainer}>
-        <View style={[styles.progressBar, { width: `${progress}%` }]}></View>
-      </View>
-    );
-  };
-
-  const updateProgressBar = () => {
-    const calculatedProgress = (currentValue / goal) * 100;
-    setProgress(calculatedProgress);
-  };
-
-  const calculateExactDate = () => {
-    const current = new Date();
-    setCurrentDay(current.toLocaleDateString());
-    setCurrentTime(current.toLocaleTimeString());
-  };
 
   useEffect(() => {
-    calculateExactDate();
-    updateProgressBar();
-  }, [currentValue, goal]);
+    const retrieveToken = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem('token');
+        setToken(storedToken);
+        fetchSleepData(storedToken);
+      } catch (error) {
+        console.error('Error retrieving token:', error);
+      }
+    };
+    retrieveToken();
+  }, []);
 
-  const handleAdd = () => {
-    addSleepToPeriod();
+  const fetchSleepData = async (token) => {
+    try {
+      const response = await fetch('http://localhost:8080/api/sleep/sleepTrack', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch sleep data');
+      }
+
+      const responseData = await response.json();
+
+      const updatedMarkedDates = {};
+      responseData.sleepTrack.forEach(entry => {
+        const date = new Date(entry.date).toISOString().split('T')[0];
+        updatedMarkedDates[date] = { marked: true, sleepHours: entry.sleep }; // Include sleep hours in marked dates
+      });
+
+      setSleepData(updatedMarkedDates);
+      console.log("update:",updatedMarkedDates);
+    } catch (error) {
+      console.error('Error fetching sleep data:', error);
+    }
+  };
+  
+  const handleDayPress = (day) => {
+    const selectedDate = day.dateString;
+    if (markedDates[selectedDate] && markedDates[selectedDate].sleepHours !== undefined) {
+      const sleepHours = markedDates[selectedDate].sleepHours;
+      alert(`You slept ${sleepHours} hours on ${selectedDate}`);
+    } else {
+      alert(`There is no sleep data available for ${selectedDate}`);
+    }
+  };
+  
+
+  const handleSleep = async () => {
+    const newSleepEntry = {
+      sleep: sleepIn,
+      date: dateIn,
+    };
+    try {
+      const response = await fetch('http://localhost:8080/api/sleep/addSleep', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+        body: JSON.stringify(newSleepEntry),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add sleep');
+      }
+
+      setSleep('');
+      setDate('');
+      setModalVisible(false);
+      fetchSleepData(token);
+    } catch (error) {
+      console.error('Error adding sleep:', error);
+    }
   };
 
-  const chartConfig = {
-    backgroundGradientFrom: '#fff',
-    backgroundGradientTo: '#fff',
-    color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
-    strokeWidth: 2,
+  const handleJournal = () => {
+    navigation.navigate('Journal');
   };
-
-  const screenWidth = Dimensions.get('window').width;
+  
+  const handleExercise = () => {
+    navigation.navigate('ExerciseJournal');
+  };
+  
+  const handleWeigth = () => {
+    navigation.navigate('WeightJournalScreen');
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.titleBig}>Sleep Journal</Text>
-        <Text style={styles.title}>
-          {currentDay} - {currentTime}
-        </Text>
-        <ProgressBar progress={progress} />
-        <Text>
-          Progress: {currentValue}/{goal} Minutes of Sleep
-        </Text>
-      </View>
-      <View style={styles.bigRectangle}>
-        <View style={{ flex: 1, alignItems: 'flex-start', justifyContent: 'center' }}>
-          {recentlyAddedSleep && <AddedSleepInfo addedSleep={recentlyAddedSleep} />}
-          <BarChart
-            data={{
-              labels: Object.keys(selectedTime),
-              datasets: [
-                {
-                  data: Object.values(selectedTime).map((sleeps) =>
-                    sleeps.reduce((totalDuration, sleep) => totalDuration + sleep.duration, 0)
-                  ),
-                },
-              ],
-            }}
-            width={screenWidth}
-            height={220}
-            yAxisLabel="Sleep Duration (mins)"
-            chartConfig={chartConfig}
-          />
-        </View>
-      </View>
-      <View style={styles.bottomContainer}>
-      <View style={styles.square}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 25, justifyContent: 'center' }}>
-            <View>
-              <Picker selectedValue={selectedDay} onValueChange={handleDayChange}>
-                <Picker.Item label="Select Day" value="" />
-                <Picker.Item label="Monday" value="Monday" />
-                <Picker.Item label="Tuesday" value="Tuesday" />
-                <Picker.Item label="Wednesday" value="Wednesday" />
-                <Picker.Item label="Thursday" value="Thursday" />
-                <Picker.Item label="Friday" value="Friday" />
-                <Picker.Item label="Saturday" value="Saturday" />
-                <Picker.Item label="Sunday" value="Sunday" />
-              </Picker>
-            </View>
-            <View>
-              <TextInput
-                style={styles.input}
-                placeholder="Sleep Duration (mins)"
-                value={sleepDuration}
-                onChangeText={handleSleepDurationChange}
-                keyboardType="numeric"
-              />
-            </View>
-            <Button title="Add" onPress={handleAdd} />
+      <Text>Sleep Journal Screen</Text>
+      <Calendar
+        style={styles.calendar}
+        markedDates={markedDates}
+        onDayPress={(day) => handleDayPress(day)}
+      />
+      <TouchableOpacity onPress={() => setModalVisible(true)}>
+        <Text>Add Sleep</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setBedtimeModalVisible(true)}>
+        <Text>Set Bedtime</Text>
+      </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text>Enter Sleep and Date</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Sleep (estimated hours)"
+              keyboardType="numeric"
+              onChangeText={(text) => setSleep(text)}
+              value={sleepIn}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Date (e.g., 01/06)"
+              onChangeText={(text) => setDate(text)}
+              value={dateIn}
+            />
+            <TouchableOpacity onPress={handleSleep}>
+              <Text>Add</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      <Button title="Food Journal" onPress={() => navigation.navigate('Journal')} />
-        <Button title="Sleep Journal" onPress={() => navigation.navigate('SleepJournal')} />
-        <Button title="Weight Journal" onPress={() => navigation.navigate('WeightJournalScreen')} />
-        <Button title="Exercise Journal" onPress={() => navigation.navigate('ExerciseJournal')} />
+      </Modal>
+      <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isBedtimeModalVisible}
+      onRequestClose={() => setBedtimeModalVisible(false)}
+      >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text>Set Bedtime</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Bedtime (10:00 PM)"
+            onChangeText={(text) => setBedtime(text)}
+            value={bedtime}
+          />
+            <TouchableOpacity onPress={handleBedtime}>
+              <Text>save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setBedtimeModalVisible(false)}>
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+
+      <View style={styles.bottomButtonsContainer}>
+        <TouchableOpacity style={styles.bottomButton} onPress={handleJournal}>
+          <Text>Food Journal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomButton} onPress={() => navigation.navigate('SleepJournal')}>
+          <Text>Sleep Journal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomButton} onPress={handleWeigth}>
+          <Text>Weight Journal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomButton} onPress={handleExercise}>
+          <Text>Exercise Journal</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -194,39 +227,43 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
   },
-  titleContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    border: '3px solid lightblue',
+  calendar: {
+    marginVertical: 8,
+    borderRadius: 16,
   },
-  bigRectangle: {
-    flexDirection: 'row',
-    width: '100%',
-    height: 400,
-    backgroundColor: 'lightgray',
-    marginBottom: 20,
+  modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  bottomContainer: {
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+  },
+  input: {
+    height: 40,
+    width: '80%',
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginVertical: 10,
+    paddingHorizontal: 10,
+  },
+  bottomButtonsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    paddingBottom: 10,
   },
-  progressBarContainer: {
-    width: '75%',
-    height: 15,
+  bottomButton: {
     backgroundColor: '#ccc',
-    borderRadius: 10,
-    marginTop: 20,
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: 'green',
-    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
   },
 });
 

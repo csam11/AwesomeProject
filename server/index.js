@@ -30,6 +30,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/activities', auth, require('./routes/activities'));
 app.use('/api/progress', auth, require('./routes/progress'))
 app.use('/api/goals',auth, require('./routes/goals'));
+app.use('/api/sleep',auth, require('./routes/sleep'));
 
 app.post('/forgot-password', (req, res) => {
     const { email } = req.body;
