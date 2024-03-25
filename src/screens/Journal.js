@@ -414,9 +414,9 @@ const renderLineChart = () => {
           <View style={styles.infoContainer}>
           <Text>Morning</Text>
           <Text>Total Calories: {calculateTotalCalories('morning')}</Text>
-          <Text>Total Fat: {selectedTime.morning.reduce((total, food) => total + food.fat, 0)}g</Text>
-          <Text>Total Carbs: {selectedTime.morning.reduce((total, food) => total + food.carbs, 0)}g</Text>
-          <Text>Total Protein: {selectedTime.morning.reduce((total, food) => total + food.protein, 0)}g</Text>
+          <Text>Total Fat: {selectedTime.morning.reduce((total, food) => total + food.fat, 0).toFixed(1)}g</Text>
+          <Text>Total Carbs: {selectedTime.morning.reduce((total, food) => total + food.carbs, 0).toFixed(1)}g</Text>
+          <Text>Total Protein: {selectedTime.morning.reduce((total, food) => total + food.protein, 0).toFixed(1)}g</Text>
           <View>
           {selectedTime.morning.map((food, index) => (
           <TouchableOpacity key={index} onPress={() => handleRemoveFood('morning', index)}>
@@ -428,9 +428,9 @@ const renderLineChart = () => {
           <View style={styles.infoContainer}>
           <Text>Afternoon</Text>
           <Text>Total Calories: {calculateTotalCalories('afternoon')}</Text>
-          <Text>Total Fat: {selectedTime.afternoon.reduce((total, food) => total + food.fat, 0)}g</Text>
-          <Text>Total Carbs: {selectedTime.afternoon.reduce((total, food) => total + food.carbs, 0)}g</Text>
-          <Text>Total Protein: {selectedTime.afternoon.reduce((total, food) => total + food.protein, 0)}g</Text>
+          <Text>Total Fat: {selectedTime.afternoon.reduce((total, food) => total + food.fat, 0).toFixed(1)}g</Text>
+          <Text>Total Carbs: {selectedTime.afternoon.reduce((total, food) => total + food.carbs, 0).toFixed(1)}g</Text>
+          <Text>Total Protein: {selectedTime.afternoon.reduce((total, food) => total + food.protein, 0).toFixed(1)}g</Text>
           <View>
           {selectedTime.afternoon.map((food, index) => (
           <TouchableOpacity key={index} onPress={() => handleRemoveFood('afternoon', index)}>
@@ -442,9 +442,9 @@ const renderLineChart = () => {
           <View style={styles.infoContainer}>
           <Text>Night</Text>
           <Text>Total Calories: {calculateTotalCalories('night')}</Text>
-          <Text>Total Fat: {selectedTime.night.reduce((total, food) => total + food.fat, 0)}g</Text>
-          <Text>Total Carbs: {selectedTime.night.reduce((total, food) => total + food.carbs, 0)}g</Text>
-          <Text>Total Protein: {selectedTime.night.reduce((total, food) => total + food.protein, 0)}g</Text>
+          <Text>Total Fat: {selectedTime.night.reduce((total, food) => total + food.fat, 0).toFixed(1)}g</Text>
+          <Text>Total Carbs: {selectedTime.night.reduce((total, food) => total + food.carbs, 0).toFixed(1)}g</Text>
+          <Text>Total Protein: {selectedTime.night.reduce((total, food) => total + food.protein, 0).toFixed(1)}g</Text>
           <View>
           {selectedTime.night.map((food, index) => (
           <TouchableOpacity key={index} onPress={() => handleRemoveFood('night', index)}>
